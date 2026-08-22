@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { QuizService } from './core/quiz.service';
 import { ToastService } from './core/toast.service';
+import { I18nService } from './core/i18n.service';
 import { SidebarComponent } from './components/sidebar';
 import { QuestionCardComponent } from './components/question-card';
 import { StudyComponent } from './components/study';
@@ -28,6 +29,9 @@ import { StudyComponent } from './components/study';
     .viewtabs button + button { border-left: 1px solid var(--line2); }
     .viewtabs button:hover { color: var(--amber); background: var(--panel2); }
     .viewtabs button.on { background: var(--accent-bg); color: var(--accent-ink); font-weight: 650; }
+    .langctl button {
+      font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .06em; padding: 6px 10px;
+    }
     .scope-bar {
       display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-bottom: 14px;
       animation: scopeIn .3s var(--ease) backwards;
@@ -47,6 +51,7 @@ import { StudyComponent } from './components/study';
 export class App {
   readonly quiz = inject(QuizService);
   readonly toast = inject(ToastService);
+  readonly i18n = inject(I18nService);
 
   readonly sideOpen = signal(false);
   readonly zoomSrc = signal('');

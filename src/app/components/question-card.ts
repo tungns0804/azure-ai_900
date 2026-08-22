@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, output } from '@angular/core';
 import { QuizService } from '../core/quiz.service';
 import { TranslateService } from '../core/translate.service';
+import { I18nService } from '../core/i18n.service';
 import { flow } from '../core/text.util';
 import { ViBoxComponent } from './vi-box';
 
@@ -11,25 +12,36 @@ import { ViBoxComponent } from './vi-box';
   template: `
     <!-- track theo q.id: đổi câu là Angular dựng lại thẻ, nhờ vậy hiệu ứng vào chạy lại -->
     @for (q of currentList(); track q.id) {
-      <div class="card">
+      <div class="card" [class.card-extra]="q.extra">
         <div class="card-head">
-          <span class="qnum">CÂU {{ q.id }}</span>
+          <span class="qnum">{{ i18n.t('card.num', { id: q.id }) }}</span>
+          @if (q.extra) {
+            <span class="tag extra-tag" [title]="i18n.t('card.extraHint')">
+              {{ i18n.t('card.extra') }}
+            </span>
+          }
           <span class="tag">{{ quiz.typeLabel(q.type) }}</span>
           @if (q.part) {
-            <span class="tag hide-sm">PART {{ q.part }}</span>
+            <span class="tag hide-sm">{{ i18n.t('card.part', { n: q.part }) }}</span>
           }
-          <span class="tag hide-sm">SLIDE {{ q.page }}</span>
+          @if (q.page) {
+            <span class="tag hide-sm">{{ i18n.t('card.slide', { n: q.page }) }}</span>
+          }
           <span class="spacer"></span>
           <button
             class="star"
             [class.on]="isFav()"
             [attr.aria-pressed]="isFav()"
-            title="Đánh dấu yêu thích (phím F)"
+            [title]="i18n.t('card.fav')"
             (click)="quiz.toggleFav()"
           >
             ★
           </button>
         </div>
+
+        @if (q.extra) {
+          <p class="extra-note">{{ i18n.t('card.extraHint') }}</p>
+        }
 
         <div class="qtext">
           @for (p of questionParas(); track $index) {
@@ -40,16 +52,16 @@ import { ViBoxComponent } from './vi-box';
 
         @if (q.imgq) {
           <div class="exhibit">
-            <button type="button" title="Bấm để phóng to" (click)="zoom.emit(q.imgq!)">
-              <img [src]="dataUri(q.imgq)" [alt]="'Hình đính kèm câu ' + q.id" />
+            <button type="button" [title]="i18n.t('card.zoomHint')" (click)="zoom.emit(q.imgq!)">
+              <img [src]="dataUri(q.imgq)" [alt]="i18n.t('card.imgAlt', { id: q.id })" />
             </button>
-            <div class="cap">Hình đính kèm của câu hỏi — bấm để phóng to.</div>
+            <div class="cap">{{ i18n.t('card.imgCap') }}</div>
           </div>
         }
 
         @if (q.type === 'single' || q.type === 'multi') {
           @if (q.type === 'multi') {
-            <p class="hint">Câu này có <b>{{ quiz.correctKeys(q).length }}</b> đáp án đúng.</p>
+            <p class="hint">{{ i18n.t('card.multiHint', { n: quiz.correctKeys(q).length }) }}</p>
           }
           <div class="opts">
             @for (o of quiz.currentOptions(); track o.k) {
@@ -64,16 +76,18 @@ import { ViBoxComponent } from './vi-box';
                 <span class="key">{{ o.k.toUpperCase() }}</span>
                 <span>{{ o.t }}</span>
                 @if (revealed() && o.c) {
-                  <span class="mark">{{ quiz.isPicked(o.k) ? 'Đúng · bạn chọn' : 'Đáp án đúng' }}</span>
+                  <span class="mark">
+                    {{ quiz.isPicked(o.k) ? i18n.t('card.markRightPicked') : i18n.t('card.markRight') }}
+                  </span>
                 } @else if (revealed() && quiz.isPicked(o.k)) {
-                  <span class="mark">Bạn chọn</span>
+                  <span class="mark">{{ i18n.t('card.markPicked') }}</span>
                 }
               </button>
             }
           </div>
         } @else {
           @if (q.type !== 'yesno') {
-            <p class="hint">Chọn đáp án cho từng dòng bên dưới.</p>
+            <p class="hint">{{ i18n.t('card.subHint') }}</p>
           }
           <div class="subs">
             @for (s of q.subs; track $index; let si = $index) {
@@ -105,7 +119,7 @@ import { ViBoxComponent } from './vi-box';
             {{ verdictText() }}
           </div>
           <div class="explain">
-            <h4>Giải thích</h4>
+            <h4>{{ i18n.t('card.explain') }}</h4>
             @if (explainBlocks().length) {
               @for (block of explainBlocks(); track $index) {
                 <div class="eblock">
@@ -116,14 +130,14 @@ import { ViBoxComponent } from './vi-box';
               }
               <app-vi-box [question]="q" part="e" [small]="true" />
             } @else {
-              <p class="noexp">Slide gốc không kèm phần giải thích cho câu này.</p>
+              <p class="noexp">{{ i18n.t('card.noExplain') }}</p>
             }
             @if (q.img) {
               <div class="exhibit" style="padding:16px 0 0">
-                <button type="button" title="Bấm để phóng to" (click)="zoom.emit(q.img!)">
-                  <img [src]="dataUri(q.img)" [alt]="'Slide gốc câu ' + q.id" />
+                <button type="button" [title]="i18n.t('card.zoomHint')" (click)="zoom.emit(q.img!)">
+                  <img [src]="dataUri(q.img)" [alt]="i18n.t('card.slideAlt', { id: q.id })" />
                 </button>
-                <div class="cap">Slide gốc từ PDF (có sẵn đáp án) — bấm để phóng to.</div>
+                <div class="cap">{{ i18n.t('card.slideCap') }}</div>
               </div>
             }
           </div>
@@ -131,18 +145,22 @@ import { ViBoxComponent } from './vi-box';
 
         <div class="actions">
           @if (!revealed()) {
-            <button class="btn primary" (click)="quiz.grade()">Kiểm tra đáp án</button>
-            <button class="btn" (click)="quiz.reveal()">Xem đáp án</button>
+            <button class="btn primary" (click)="quiz.grade()">{{ i18n.t('card.check') }}</button>
+            <button class="btn" (click)="quiz.reveal()">{{ i18n.t('card.reveal') }}</button>
             <span class="keys">
-              <kbd>1</kbd>–<kbd>9</kbd> chọn · <kbd>Enter</kbd> kiểm tra · <kbd>F</kbd> yêu thích
+              <kbd>1</kbd>–<kbd>9</kbd> {{ i18n.t('card.keysPick') }} · <kbd>Enter</kbd>
+              {{ i18n.t('card.keysCheck') }} · <kbd>F</kbd> {{ i18n.t('card.keysFav') }}
             </span>
           } @else {
-            <button class="btn" (click)="quiz.retry()">Làm lại câu này</button>
+            <button class="btn" (click)="quiz.retry()">{{ i18n.t('card.retry') }}</button>
             @if (quiz.canNext()) {
-              <button class="btn primary" (click)="quiz.go(quiz.idx() + 1)">Câu tiếp theo →</button>
+              <button class="btn primary" (click)="quiz.go(quiz.idx() + 1)">
+                {{ i18n.t('card.next') }}
+              </button>
             }
             <span class="keys">
-              <kbd>Enter</kbd> câu sau · <kbd>←</kbd><kbd>→</kbd> chuyển câu
+              <kbd>Enter</kbd> {{ i18n.t('card.keysNext') }} · <kbd>←</kbd><kbd>→</kbd>
+              {{ i18n.t('card.keysMove') }}
             </span>
           }
         </div>
@@ -150,20 +168,31 @@ import { ViBoxComponent } from './vi-box';
     } @empty {
       <div class="card">
         <div class="qtext">
-          Không có câu hỏi nào trong chế độ <b>{{ quiz.modeName(quiz.mode()) }}</b
-          >.
+          {{ i18n.t('card.emptyMode', { mode: quiz.modeName(quiz.mode()) }) }}
         </div>
         <div class="opts">
-          <p class="empty">
-            Chọn “Toàn bộ” ở thanh bên, hoặc đánh dấu ⭐ ở các câu bạn muốn ôn lại.
-          </p>
+          <p class="empty">{{ i18n.t('card.emptyHint') }}</p>
         </div>
       </div>
     }
   `,
+  styles: `
+    .card-extra { border-color: var(--extra-line); box-shadow: inset 3px 0 0 var(--extra); }
+    .extra-tag {
+      color: var(--extra); border-color: var(--extra-line); background: var(--extra-bg);
+      font-weight: 600; letter-spacing: .06em;
+    }
+    .extra-note {
+      margin: 0; padding: 9px 20px; font-size: 12.5px; line-height: 1.55;
+      color: var(--extra); background: var(--extra-bg);
+      border-bottom: 1px solid var(--line);
+    }
+    @media (max-width: 900px) { .extra-note { padding-left: 14px; padding-right: 14px; } }
+  `,
 })
 export class QuestionCardComponent {
   readonly quiz = inject(QuizService);
+  readonly i18n = inject(I18nService);
   private readonly tr = inject(TranslateService);
 
   /** phát ra base64 của ảnh cần phóng to */
@@ -200,15 +229,13 @@ export class QuestionCardComponent {
 
   readonly verdictText = computed(() => {
     const st = this.status();
-    return st === 'ok'
-      ? '✓ Chính xác'
-      : st === 'sh'
-        ? '◆ Bạn đã xem đáp án — câu này được xếp vào nhóm cần ôn lại'
-        : '✕ Chưa đúng';
+    return this.i18n.t(
+      st === 'ok' ? 'card.verdictOk' : st === 'sh' ? 'card.verdictSh' : 'card.verdictNo',
+    );
   });
 
   constructor() {
-    // yêu cầu dịch cho câu hiện tại khi bật VI — tương ứng ensureTranslations() của bản gốc
+    // yêu cầu dịch cho câu hiện tại khi bật song ngữ — tương ứng ensureTranslations() của bản gốc
     effect(() => {
       const q = this.quiz.current();
       if (!q || !this.quiz.showVi()) return;

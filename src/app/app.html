@@ -10,41 +10,63 @@
   <main>
     <div class="topwrap">
       <div class="topbar">
-        <button class="btn sm" id="menuBtn" (click)="sideOpen.set(true)">☰ Danh sách</button>
-        <div class="viewtabs" role="group" aria-label="Màn hình">
+        <button class="btn sm" id="menuBtn" (click)="sideOpen.set(true)">
+          {{ i18n.t('app.menu') }}
+        </button>
+        <div class="viewtabs" role="group" [attr.aria-label]="i18n.t('view.group')">
           <button
             [class.on]="quiz.view() === 'practice'"
             [attr.aria-pressed]="quiz.view() === 'practice'"
             (click)="quiz.setView('practice')"
           >
-            Luyện thi
+            {{ i18n.t('view.practice') }}
           </button>
           <button
             [class.on]="quiz.view() === 'study'"
             [attr.aria-pressed]="quiz.view() === 'study'"
             (click)="quiz.setView('study')"
           >
-            Học kiến thức
+            {{ i18n.t('view.study') }}
           </button>
         </div>
         <div class="sep hide-sm"></div>
-        <div class="stat">Đã làm <b>{{ quiz.stats().done }}/{{ quiz.stats().total }}</b></div>
-        <div class="stat good hide-sm">Đúng <b>{{ quiz.stats().ok }}</b></div>
-        <div class="stat bad hide-sm">Sai <b>{{ quiz.stats().no }}</b></div>
-        <div class="stat hide-sm">Tỉ lệ <b>{{ quiz.stats().rate }}</b></div>
+        <div class="stat">
+          {{ i18n.t('top.done') }} <b>{{ quiz.stats().done }}/{{ quiz.stats().total }}</b>
+        </div>
+        <div class="stat good hide-sm">{{ i18n.t('top.ok') }} <b>{{ quiz.stats().ok }}</b></div>
+        <div class="stat bad hide-sm">{{ i18n.t('top.no') }} <b>{{ quiz.stats().no }}</b></div>
+        <div class="stat hide-sm">{{ i18n.t('top.rate') }} <b>{{ quiz.stats().rate }}</b></div>
         <span class="spacer"></span>
-        <div class="sizectl" role="group" aria-label="Cỡ chữ">
+        <div class="viewtabs langctl" role="group" [attr.aria-label]="i18n.t('top.langGroup')">
           <button
-            title="Giảm cỡ chữ"
-            aria-label="Giảm cỡ chữ"
+            [class.on]="i18n.lang() === 'vi'"
+            [attr.aria-pressed]="i18n.lang() === 'vi'"
+            [title]="i18n.t('top.langHint')"
+            (click)="quiz.setLang('vi')"
+          >
+            VI
+          </button>
+          <button
+            [class.on]="i18n.lang() === 'en'"
+            [attr.aria-pressed]="i18n.lang() === 'en'"
+            [title]="i18n.t('top.langHint')"
+            (click)="quiz.setLang('en')"
+          >
+            EN
+          </button>
+        </div>
+        <div class="sizectl" role="group" [attr.aria-label]="i18n.t('top.sizeGroup')">
+          <button
+            [title]="i18n.t('top.sizeDown')"
+            [attr.aria-label]="i18n.t('top.sizeDown')"
             [disabled]="quiz.size() === 'md'"
             (click)="quiz.stepSize(-1)"
           >
             A−
           </button>
           <button
-            title="Tăng cỡ chữ"
-            aria-label="Tăng cỡ chữ"
+            [title]="i18n.t('top.sizeUp')"
+            [attr.aria-label]="i18n.t('top.sizeUp')"
             [disabled]="quiz.size() === 'xl'"
             (click)="quiz.stepSize(1)"
           >
@@ -54,13 +76,13 @@
         <button
           class="btn sm"
           [attr.aria-pressed]="quiz.showVi()"
-          title="Hiện bản dịch tiếng Việt"
+          [title]="i18n.t('top.viHint')"
           (click)="quiz.toggleVi()"
         >
-          {{ quiz.showVi() ? 'VI: Bật' : 'VI: Tắt' }}
+          {{ quiz.showVi() ? i18n.t('top.viOn') : i18n.t('top.viOff') }}
         </button>
         <button class="btn sm" (click)="quiz.toggleTheme()">
-          {{ quiz.theme() === 'dark' ? 'Nền sáng' : 'Nền tối' }}
+          {{ quiz.theme() === 'dark' ? i18n.t('top.themeLight') : i18n.t('top.themeDark') }}
         </button>
       </div>
       <div class="bar"><i [style.width.%]="quiz.stats().pct"></i></div>
@@ -72,11 +94,13 @@
       } @else {
         @if (quiz.categoryLabel(); as label) {
           <div class="scope-bar">
-            <span class="scope-lbl">Phạm vi</span>
+            <span class="scope-lbl">{{ i18n.t('scope.label') }}</span>
             <b>{{ label }}</b>
-            <span class="scope-n">{{ quiz.order().length }} câu</span>
+            <span class="scope-n">{{ i18n.t('common.questions', { n: quiz.order().length }) }}</span>
             <span class="spacer"></span>
-            <button class="btn sm" (click)="quiz.setCategory(null)">Bỏ lọc</button>
+            <button class="btn sm" (click)="quiz.setCategory(null)">
+              {{ i18n.t('common.clearFilter') }}
+            </button>
           </div>
         }
         <app-question-card (zoom)="openZoom($event)" />
@@ -86,10 +110,10 @@
     @if (quiz.view() === 'practice') {
       <div class="navbar">
         <button class="btn" [disabled]="!quiz.canPrev()" (click)="quiz.go(quiz.idx() - 1)">
-          ← Câu trước
+          ← {{ i18n.t('nav.prev') }}
         </button>
         <button class="btn" [disabled]="!quiz.canNext()" (click)="quiz.go(quiz.idx() + 1)">
-          Câu sau →
+          {{ i18n.t('nav.next') }} →
         </button>
         <span class="spacer"></span>
         <span class="pos">
@@ -107,15 +131,17 @@
 </div>
 
 <dialog #zoomDlg id="zoomDlg">
-  <div class="dlg-h">Slide gốc</div>
-  <div class="dlg-b"><img [src]="zoomSrc()" alt="Slide gốc phóng to" /></div>
-  <div class="dlg-f"><button class="btn" (click)="zoomDlg.close()">Đóng</button></div>
+  <div class="dlg-h">{{ i18n.t('dlg.zoomTitle') }}</div>
+  <div class="dlg-b"><img [src]="zoomSrc()" [alt]="i18n.t('dlg.zoomAlt')" /></div>
+  <div class="dlg-f">
+    <button class="btn" (click)="zoomDlg.close()">{{ i18n.t('common.close') }}</button>
+  </div>
 </dialog>
 
 <dialog #impDlg>
-  <div class="dlg-h">Nhập dữ liệu tiến độ</div>
+  <div class="dlg-h">{{ i18n.t('dlg.importTitle') }}</div>
   <div class="dlg-b">
-    <p>Chọn file JSON đã xuất trước đó, hoặc dán nội dung vào ô bên dưới.</p>
+    <p>{{ i18n.t('dlg.importBody') }}</p>
     <input
       type="file"
       accept="application/json,.json"
@@ -129,19 +155,18 @@
     ></textarea>
   </div>
   <div class="dlg-f">
-    <button class="btn" (click)="impDlg.close()">Huỷ</button>
-    <button class="btn primary" (click)="confirmImport()">Nhập dữ liệu</button>
+    <button class="btn" (click)="impDlg.close()">{{ i18n.t('common.cancel') }}</button>
+    <button class="btn primary" (click)="confirmImport()">{{ i18n.t('dlg.importOk') }}</button>
   </div>
 </dialog>
 
 <dialog #resetDlg>
-  <div class="dlg-h">Xoá toàn bộ tiến độ?</div>
-  <div class="dlg-b">
-    Thao tác này xoá câu yêu thích, kết quả từng câu và toàn bộ lịch sử luyện tập. Không thể hoàn
-    tác. Nên bấm “Xuất JSON” trước nếu bạn muốn giữ lại.
-  </div>
+  <div class="dlg-h">{{ i18n.t('dlg.resetTitle') }}</div>
+  <div class="dlg-b">{{ i18n.t('dlg.resetBody') }}</div>
   <div class="dlg-f">
-    <button class="btn" (click)="resetDlg.close()">Giữ lại</button>
-    <button class="btn primary" (click)="quiz.resetAll(); resetDlg.close()">Xoá tất cả</button>
+    <button class="btn" (click)="resetDlg.close()">{{ i18n.t('dlg.resetKeep') }}</button>
+    <button class="btn primary" (click)="quiz.resetAll(); resetDlg.close()">
+      {{ i18n.t('dlg.resetOk') }}
+    </button>
   </div>
 </dialog>

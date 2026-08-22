@@ -1,3 +1,5 @@
+import { Lang } from './i18n';
+
 export type QuestionType = 'single' | 'multi' | 'yesno' | 'yesno_table' | 'match';
 export type Mode = 'all' | 'fav' | 'review' | 'todo';
 export type Size = 'md' | 'lg' | 'xl';
@@ -36,6 +38,11 @@ export interface Question {
   domain: string;
   /** chủ đề chi tiết, khớp id trong categories.ts */
   topic: string;
+  /**
+   * true = câu hỏi BỔ SUNG do ứng dụng biên soạn theo đề cương chính thức
+   * (không có trong bộ slide PDF gốc). Giao diện gắn nhãn tím "★ BỔ SUNG" cho các câu này.
+   */
+  extra?: boolean;
 }
 
 /**
@@ -82,6 +89,8 @@ export interface Settings {
   category?: string | null;
   /** màn hình đang xem */
   view?: View;
+  /** ngôn ngữ giao diện */
+  lang?: Lang;
   shuffleQ?: boolean;
   shuffleO?: boolean;
   autoNext?: boolean;

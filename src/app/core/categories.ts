@@ -4,6 +4,8 @@
  * Mỗi chủ đề kèm mô tả tổng quan và link tài liệu Microsoft để đọc chi tiết.
  */
 
+import { DOMAIN_EN, TOPIC_EN } from './categories.en';
+
 export type DomainId = 'd1' | 'd2' | 'd3' | 'd4' | 'd5';
 
 export interface StudyLink {
@@ -15,6 +17,10 @@ export interface StudyTopic {
   id: string;
   /** tên chủ đề (tiếng Việt) */
   title: string;
+  /** tên chủ đề (tiếng Anh) — gán tự động từ categories.en.ts */
+  titleEn?: string;
+  /** mô tả tổng quan (tiếng Anh) — gán tự động từ categories.en.ts */
+  overviewEn?: string;
   /** mục tiêu tương ứng trong đề cương chính thức (nguyên văn tiếng Anh) */
   objective: string;
   /** mô tả tổng quan */
@@ -31,6 +37,10 @@ export interface StudyGroup {
 export interface StudyDomain {
   id: DomainId;
   title: string;
+  /** tên phần thi (tiếng Anh) — gán tự động từ categories.en.ts */
+  titleEn?: string;
+  /** dẫn nhập (tiếng Anh) — gán tự động từ categories.en.ts */
+  introEn?: string;
   objective: string;
   /** tỉ trọng trong đề thi */
   weight: string;
@@ -569,7 +579,7 @@ export const DOMAINS: StudyDomain[] = [
     objective: 'Describe features of generative AI workloads on Azure',
     weight: '20–25%',
     intro:
-      'Phần có tỉ trọng LỚN NHẤT trong đề thi hiện hành (20–25%). Ngân hàng 115 câu trong app này ra đời trước bản cập nhật 02/05/2025 nên chưa có câu hỏi cho phần này — hãy học kỹ qua các link tài liệu bên dưới.',
+      'Phần có tỉ trọng LỚN NHẤT trong đề thi hiện hành (20–25%). Ngân hàng 115 câu gốc lấy từ bộ slide PDF ra đời trước bản cập nhật 02/05/2025 nên không có câu nào cho phần này — toàn bộ câu hỏi ở đây là câu BỔ SUNG do ứng dụng biên soạn. Hãy học kèm các link tài liệu bên dưới.',
     groups: [
       {
         title: 'Identify features of generative AI solutions',
@@ -658,8 +668,19 @@ export const DOMAINS: StudyDomain[] = [
 export const TOPIC_BY_ID: Record<string, StudyTopic> = {};
 export const DOMAIN_OF_TOPIC: Record<string, DomainId> = {};
 for (const d of DOMAINS) {
+  // gắn bản tiếng Anh vào đúng phần thi / chủ đề
+  const de = DOMAIN_EN[d.id];
+  if (de) {
+    d.titleEn = de.title;
+    d.introEn = de.intro;
+  }
   for (const g of d.groups) {
     for (const t of g.topics) {
+      const te = TOPIC_EN[t.id];
+      if (te) {
+        t.titleEn = te.title;
+        t.overviewEn = te.overview;
+      }
       TOPIC_BY_ID[t.id] = t;
       DOMAIN_OF_TOPIC[t.id] = d.id;
     }

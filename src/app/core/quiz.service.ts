@@ -19,30 +19,37 @@ import { DOMAINS, DOMAIN_BY_ID, TOPIC_BY_ID } from './categories';
 import { shuffle } from './text.util';
 import { StorageService } from './storage.service';
 import { ToastService } from './toast.service';
+import { I18nService } from './i18n.service';
+import { I18nKey, Lang } from './i18n';
+
+/** phạm vi ảo: chỉ câu bổ sung / chỉ câu gốc từ PDF */
+export const CAT_EXTRA = 'extra';
+export const CAT_ORIGIN = 'origin';
 
 const K_DATA = 'ai900:data:v1';
 export const SIZES: Size[] = ['md', 'lg', 'xl'];
 
-const MODE_NAMES: Record<string, string> = {
-  all: 'Toàn bộ',
-  fav: 'Yêu thích',
-  review: 'Cần ôn lại',
-  wrong: 'Cần ôn lại',
-  todo: 'Chưa làm',
+const MODE_KEYS: Record<string, I18nKey> = {
+  all: 'mode.all',
+  fav: 'mode.favShort',
+  review: 'mode.review',
+  wrong: 'mode.review',
+  todo: 'mode.todo',
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  single: 'CHỌN 1 ĐÁP ÁN',
-  multi: 'CHỌN NHIỀU ĐÁP ÁN',
-  yesno: 'YES / NO',
-  yesno_table: 'BẢNG YES / NO',
-  match: 'GHÉP NỐI',
+const TYPE_KEYS: Record<string, I18nKey> = {
+  single: 'type.single',
+  multi: 'type.multi',
+  yesno: 'type.yesno',
+  yesno_table: 'type.yesno_table',
+  match: 'type.match',
 };
 
 @Injectable({ providedIn: 'root' })
 export class QuizService {
   private readonly store = inject(StorageService);
   private readonly toast = inject(ToastService);
+  private readonly i18n = inject(I18nService);
 
   /* ---------- dữ liệu ---------- */
   readonly questions = signal<Question[]>([]);
@@ -77,7 +84,11 @@ export class QuizService {
   private optOrderCache = new Map<number, number[]>();
 
   readonly ready = signal(false);
-  readonly storeModeLabel = this.store.modeLabel;
+  readonly storeModeLabel = computed(() => this.i18n.t(this.store.modeKey));
+
+  /** tổng số câu hỏi bổ sung do ứng dụng biên soạn */
+  readonly extraTotal = computed(() => this.questions().filter((q) => !!q.extra).length);
+  readonly originTotal = computed(() => this.questions().filter((q) => !q.extra).length);
 
   /* ---------- dẫn xuất ---------- */
   readonly current = computed<Question | null>(() => {
@@ -141,7 +152,7 @@ export class QuizService {
   /** tiến độ theo từng phần thi và từng chủ đề, dùng cho màn hình Học kiến thức */
   readonly coverage = computed(() => {
     const prog = this.prog();
-    const blank = () => ({ total: 0, done: 0, ok: 0, no: 0, sh: 0 });
+    const blank = () => ({ total: 0, done: 0, ok: 0, no: 0, sh: 0, extra: 0 });
     const domains: Record<string, ReturnType<typeof blank>> = {};
     const topics: Record<string, ReturnType<typeof blank>> = {};
     for (const d of DOMAINS) {
@@ -153,6 +164,7 @@ export class QuizService {
       const st = this.statusFrom(prog, q.id);
       for (const b of bucket) {
         b.total++;
+        if (q.extra) b.extra++;
         if (st === 'ok') { b.ok++; b.done++; }
         else if (st === 'no') { b.no++; b.done++; }
         else if (st === 'sh') { b.sh++; b.done++; }
@@ -165,7 +177,13 @@ export class QuizService {
   readonly categoryLabel = computed(() => {
     const c = this.category();
     if (!c) return null;
-    return DOMAIN_BY_ID[c]?.title ?? TOPIC_BY_ID[c]?.title ?? c;
+    if (c === CAT_EXTRA) return this.i18n.t('scope.extra');
+    if (c === CAT_ORIGIN) return this.i18n.t('scope.origin');
+    const d = DOMAIN_BY_ID[c];
+    if (d) return this.i18n.pick(d.title, d.titleEn);
+    const t = TOPIC_BY_ID[c];
+    if (t) return this.i18n.pick(t.title, t.titleEn);
+    return c;
   });
 
   readonly canPrev = computed(() => this.idx() > 0);
@@ -186,8 +204,10 @@ export class QuizService {
       this.mode.set(st.mode === 'wrong' ? 'review' : ((st.mode as Mode) || 'all'));
       // chỉ nhận lại bộ lọc nếu id vẫn còn tồn tại trong danh mục
       const cat = st.category ?? null;
-      this.category.set(cat && (DOMAIN_BY_ID[cat] || TOPIC_BY_ID[cat]) ? cat : null);
+      this.category.set(cat && this.isKnownCategory(cat) ? cat : null);
       this.view.set(st.view === 'study' ? 'study' : 'practice');
+      // người dùng cũ chưa từng chọn ngôn ngữ thì giữ nguyên tiếng Việt như trước
+      this.i18n.set(st.lang === 'en' || st.lang === 'vi' ? st.lang : 'vi');
       this.shuffleQ.set(!!st.shuffleQ);
       this.shuffleO.set(!!st.shuffleO);
       this.autoNext.set(!!st.autoNext);
@@ -196,10 +216,18 @@ export class QuizService {
       this.size.set(SIZES.indexOf(st.size as Size) >= 0 ? (st.size as Size) : 'md');
       this.idx.set(st.idx || 0);
     }
+    if (!d) this.i18n.set('vi');
     this.applyLook();
     this.buildOrder(false);
     if (this.idx() >= this.order().length) this.idx.set(0);
     this.ready.set(true);
+  }
+
+  /** id phạm vi có hợp lệ không (phần thi, chủ đề hoặc phạm vi ảo) */
+  private isKnownCategory(cat: string): boolean {
+    return (
+      cat === CAT_EXTRA || cat === CAT_ORIGIN || !!DOMAIN_BY_ID[cat] || !!TOPIC_BY_ID[cat]
+    );
   }
 
   /* ---------- ghi ---------- */
@@ -218,6 +246,7 @@ export class QuizService {
           mode: this.mode(),
           category: this.category(),
           view: this.view(),
+          lang: this.i18n.lang(),
           shuffleQ: this.shuffleQ(),
           shuffleO: this.shuffleO(),
           autoNext: this.autoNext(),
@@ -249,6 +278,8 @@ export class QuizService {
   /** câu hỏi có thuộc phạm vi lọc hiện tại không (phần thi hoặc chủ đề) */
   private inCategory(q: Question, cat: string | null): boolean {
     if (!cat) return true;
+    if (cat === CAT_EXTRA) return !!q.extra;
+    if (cat === CAT_ORIGIN) return !q.extra;
     return cat.startsWith('d') && cat.length === 2 ? q.domain === cat : q.topic === cat;
   }
 
@@ -277,11 +308,13 @@ export class QuizService {
   }
 
   typeLabel(t: string): string {
-    return TYPE_LABELS[t] || t;
+    const k = TYPE_KEYS[t];
+    return k ? this.i18n.t(k) : t;
   }
 
   modeName(m: string): string {
-    return MODE_NAMES[m] || m;
+    const k = MODE_KEYS[m];
+    return k ? this.i18n.t(k) : m;
   }
 
   /* ---------- phiên luyện tập ---------- */
@@ -305,14 +338,14 @@ export class QuizService {
   endSession(silent = false): void {
     const s = this.session();
     if (!s) {
-      if (!silent) this.toast.show('Chưa có phiên luyện tập nào đang chạy.');
+      if (!silent) this.toast.show(this.i18n.t('toast.noSession'));
       return;
     }
     const ids = Object.keys(s.answers);
     if (!ids.length) {
       this.session.set(null);
       this.save();
-      if (!silent) this.toast.show('Phiên trống đã được huỷ.');
+      if (!silent) this.toast.show(this.i18n.t('toast.emptySession'));
       return;
     }
     let ok = 0;
@@ -339,7 +372,8 @@ export class QuizService {
     this.history.set(h);
     this.session.set(null);
     this.save();
-    if (!silent) this.toast.show('Đã lưu phiên: ' + ok + '/' + ids.length + ' câu đúng.');
+    if (!silent)
+      this.toast.show(this.i18n.t('toast.sessionSaved', { ok, total: ids.length }));
   }
 
   /* ---------- chọn đáp án ---------- */
@@ -381,7 +415,9 @@ export class QuizService {
     const sel = this.pick()[q.id];
     if (!sel || !sel.length || sel.some((x) => x == null)) {
       this.toast.show(
-        q.type === 'single' || q.type === 'multi' ? 'Hãy chọn đáp án trước.' : 'Hãy chọn đủ tất cả các ô.',
+        this.i18n.t(
+          q.type === 'single' || q.type === 'multi' ? 'toast.pickAnswer' : 'toast.pickAll',
+        ),
       );
       return;
     }
@@ -399,7 +435,7 @@ export class QuizService {
     this.recordAnswer(q.id, { ok, ts });
     this.save();
     if (ok && this.autoNext() && this.canNext()) {
-      this.toast.show('Chính xác — sang câu tiếp theo.');
+      this.toast.show(this.i18n.t('toast.correctNext'));
       setTimeout(() => this.go(this.idx() + 1), 550);
       return;
     }
@@ -487,7 +523,7 @@ export class QuizService {
       const j = this.order().indexOf(id);
       if (j >= 0) {
         this.go(j);
-        this.toast.show('Đã bỏ bộ lọc để mở câu ' + id + '.');
+        this.toast.show(this.i18n.t('toast.filterDropped', { id }));
         return true;
       }
     }
@@ -510,6 +546,14 @@ export class QuizService {
     this.save();
   }
 
+  /** đổi ngôn ngữ giao diện và lưu lại lựa chọn */
+  setLang(l: Lang): void {
+    if (this.i18n.lang() === l) return;
+    this.i18n.set(l);
+    this.save();
+    this.toast.show(this.i18n.t('toast.langChanged'));
+  }
+
   /**
    * Đặt phạm vi ôn tập theo phần thi hoặc chủ đề (null = toàn bộ).
    * Nếu phạm vi mới rỗng ở chế độ hiện tại thì tự quay về "Toàn bộ" để không kẹt màn hình trống.
@@ -524,7 +568,9 @@ export class QuizService {
     if (!opts.silent) {
       const n = this.order().length;
       this.toast.show(
-        cat ? 'Phạm vi: ' + this.categoryLabel() + ' · ' + n + ' câu' : 'Đã bỏ lọc — ôn toàn bộ ' + n + ' câu.',
+        cat
+          ? this.i18n.t('scope.set', { name: this.categoryLabel() ?? '', n })
+          : this.i18n.t('scope.cleared', { n }),
       );
     }
   }
@@ -532,6 +578,12 @@ export class QuizService {
   /** Số câu hỏi có sẵn cho một phần thi / chủ đề, không phụ thuộc chế độ đang chọn. */
   countFor(cat: string): number {
     return this.poolFor('all', cat).length;
+  }
+
+  /** Trong đó có bao nhiêu câu là câu bổ sung. */
+  extraCountFor(cat: string): number {
+    const ids = new Set(this.poolFor('all', cat));
+    return this.questions().filter((q) => q.extra && ids.has(q.id)).length;
   }
 
   setShuffleQ(v: boolean): void {
@@ -568,7 +620,11 @@ export class QuizService {
     this.size.set(SIZES[i]);
     this.applyLook();
     this.save();
-    this.toast.show('Cỡ chữ: ' + ['Vừa', 'Lớn', 'Rất lớn'][i]);
+    this.toast.show(
+      this.i18n.t('toast.sizeChanged', {
+        size: this.i18n.t((['size.md', 'size.lg', 'size.xl'] as const)[i]),
+      }),
+    );
   }
 
   applyLook(): void {
@@ -589,6 +645,7 @@ export class QuizService {
       progress: this.prog(),
       history: this.history(),
       settings: {
+        lang: this.i18n.lang(),
         shuffleQ: this.shuffleQ(),
         shuffleO: this.shuffleO(),
         autoNext: this.autoNext(),
@@ -605,7 +662,7 @@ export class QuizService {
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    this.toast.show('Đã tải file JSON tiến độ.');
+    this.toast.show(this.i18n.t('toast.exported'));
   }
 
   importData(txt: string): boolean {
@@ -613,11 +670,11 @@ export class QuizService {
     try {
       d = JSON.parse(txt);
     } catch {
-      this.toast.show('File JSON không hợp lệ.');
+      this.toast.show(this.i18n.t('toast.badJson'));
       return false;
     }
     if (!d || typeof d !== 'object') {
-      this.toast.show('File JSON không hợp lệ.');
+      this.toast.show(this.i18n.t('toast.badJson'));
       return false;
     }
     if (Array.isArray(d.favorites)) {
@@ -628,6 +685,7 @@ export class QuizService {
     if (d.progress && typeof d.progress === 'object') this.prog.set(d.progress);
     if (Array.isArray(d.history)) this.history.set(d.history);
     if (d.settings) {
+      if (d.settings.lang === 'en' || d.settings.lang === 'vi') this.i18n.set(d.settings.lang);
       this.shuffleQ.set(!!d.settings.shuffleQ);
       this.shuffleO.set(!!d.settings.shuffleO);
       this.autoNext.set(!!d.settings.autoNext);
@@ -647,7 +705,7 @@ export class QuizService {
     this.applyLook();
     this.buildOrder(false);
     this.save();
-    this.toast.show('Đã nhập dữ liệu.');
+    this.toast.show(this.i18n.t('toast.imported'));
     return true;
   }
 
@@ -661,6 +719,6 @@ export class QuizService {
     this.optOrderCache.clear();
     this.buildOrder(false);
     this.save();
-    this.toast.show('Đã xoá toàn bộ tiến độ.');
+    this.toast.show(this.i18n.t('toast.resetDone'));
   }
 }

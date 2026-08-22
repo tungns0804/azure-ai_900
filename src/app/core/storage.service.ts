@@ -37,12 +37,13 @@ export class StorageService {
     }
   }
 
-  get modeLabel(): string {
+  /** khoá i18n mô tả nơi dữ liệu được lưu */
+  get modeKey(): 'store.memory' | 'store.artifact' | 'store.local' {
     return this.mode === 'memory'
-      ? 'Không lưu được (chỉ trong phiên này)'
+      ? 'store.memory'
       : this.mode === 'artifact'
-        ? 'Đã lưu trong Claude'
-        : 'Đã lưu trên trình duyệt';
+        ? 'store.artifact'
+        : 'store.local';
   }
 
   async get<T>(key: string): Promise<T | null> {

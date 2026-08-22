@@ -1,19 +1,30 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { Question, ViEntry, ViPart } from './models';
 import { StorageService } from './storage.service';
 
 const K_VI = 'ai900:vi:v1';
 
 /**
- * Cấu hình gọi API dịch — giữ đúng như bản HTML gốc.
- * Chỉ hoạt động khi trang chạy trong giao diện Claude.ai (được proxy sẵn),
- * hoặc khi bạn trỏ `endpoint` sang proxy backend của riêng mình.
+ * Nguồn bản dịch, theo thứ tự ưu tiên:
+ *
+ *   1. bản dịch KÈM SẴN trong public/ai900-vi.json — chạy offline, không cần mạng;
+ *   2. bản dịch người dùng đã lấy về trước đó và lưu trong storage;
+ *   3. gọi API dịch — chỉ khi trang được cấu hình sẵn một endpoint.
+ *
+ * Bản gốc luôn gọi thẳng api.anthropic.com nên trên GitHub Pages sẽ hỏng vì CORS và
+ * vì không có API key. Endpoint mặc định vì thế để trống; ai muốn tự cắm proxy riêng
+ * thì đặt `window.AI900_TRANSLATE_ENDPOINT` trước khi ứng dụng khởi động.
  */
 export const VI_API = {
-  endpoint: 'https://api.anthropic.com/v1/messages',
+  endpoint: '',
   model: 'claude-sonnet-4-6',
   maxTokens: 1000,
 };
+
+function configuredEndpoint(): string {
+  const w = window as unknown as { AI900_TRANSLATE_ENDPOINT?: string };
+  return (w.AI900_TRANSLATE_ENDPOINT || VI_API.endpoint || '').trim();
+}
 
 interface Payload {
   question?: string[];
@@ -26,10 +37,16 @@ interface Payload {
 export class TranslateService {
   private readonly store = inject(StorageService);
 
-  /** bản dịch đã có, khoá "<id>:<part>" */
+  /** bản dịch kèm sẵn theo ứng dụng, khoá "<id>:<part>" */
+  private readonly builtIn = signal<Record<string, ViEntry>>({});
+  /** bản dịch lấy từ API và đã lưu lại, khoá "<id>:<part>" */
   readonly vi = signal<Record<string, ViEntry>>({});
   /** các khoá đang dịch */
   readonly busy = signal<Record<string, boolean>>({});
+
+  setBuiltIn(v: Record<string, ViEntry> | null | undefined): void {
+    if (v) this.builtIn.set(v);
+  }
 
   async load(): Promise<void> {
     const v = await this.store.get<Record<string, ViEntry>>(K_VI);
@@ -47,7 +64,8 @@ export class TranslateService {
   }
 
   entry(id: number, part: ViPart): ViEntry | undefined {
-    return this.vi()[this.key(id, part)];
+    const k = this.key(id, part);
+    return this.builtIn()[k] ?? this.vi()[k];
   }
 
   isBusy(id: number, part: ViPart): boolean {
@@ -65,9 +83,18 @@ export class TranslateService {
     return { explanation: q.explanation };
   }
 
+  /**
+   * Bảo đảm có bản dịch cho một phần của câu hỏi.
+   * Đã có sẵn thì không làm gì; chưa có và không cấu hình endpoint thì cũng không làm gì
+   * (hộp dịch sẽ hiện thông báo "chưa có bản dịch" thay vì lỗi mạng).
+   */
   translate(q: Question, part: ViPart): void {
     const key = this.key(q.id, part);
-    if (this.vi()[key] || this.busy()[key]) return;
+    if (this.entry(q.id, part) || this.busy()[key]) return;
+
+    const endpoint = configuredEndpoint();
+    if (!endpoint) return;
+
     this.busy.set({ ...this.busy(), [key]: true });
 
     const body = {
@@ -87,7 +114,7 @@ export class TranslateService {
       ],
     };
 
-    fetch(VI_API.endpoint, {
+    fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -102,7 +129,10 @@ export class TranslateService {
           .map((b) => b.text)
           .join('\n')
           .trim();
-        txt = txt.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+        txt = txt
+          .replace(/^```(?:json)?/i, '')
+          .replace(/```$/, '')
+          .trim();
         this.vi.set({ ...this.vi(), [key]: JSON.parse(txt) as ViEntry });
         this.save();
       })

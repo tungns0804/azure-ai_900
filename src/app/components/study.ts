@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AI901_URL, DOMAINS, STUDY_GUIDE_URL } from '../core/categories';
-import { QuizService } from '../core/quiz.service';
+import { CAT_EXTRA, QuizService } from '../core/quiz.service';
+import { I18nService } from '../core/i18n.service';
 
 @Component({
   selector: 'app-study',
@@ -9,39 +10,50 @@ import { QuizService } from '../core/quiz.service';
     <div class="study">
       <div class="card study-intro">
         <div class="card-head">
-          <span class="qnum">LỘ TRÌNH</span>
-          <span class="tag">5 PHẦN THI</span>
-          <span class="tag hide-sm">{{ topicTotal() }} CHỦ ĐỀ</span>
+          <span class="qnum">{{ i18n.t('study.roadmap') }}</span>
+          <span class="tag">{{ i18n.t('study.domains') }}</span>
+          <span class="tag hide-sm">{{ i18n.t('study.topics', { n: topicTotal() }) }}</span>
           <span class="spacer"></span>
           <a class="btn sm" [href]="studyGuideUrl" target="_blank" rel="noopener">
-            Đề cương gốc ↗
+            {{ i18n.t('study.guideLink') }}
           </a>
         </div>
         <div class="study-body">
-          <p>
-            Danh sách dưới đây bám theo đề cương <b>Skills measured</b> chính thức của Microsoft cho
-            kỳ thi AI-900 (bản hiệu lực 02/05/2025). Mỗi chủ đề có phần mô tả tổng quan và link tài
-            liệu Microsoft để đọc chi tiết. Bấm <b>Thi phần này</b> để luyện đúng nhóm câu hỏi tương
-            ứng.
-          </p>
+          <p>{{ i18n.t('study.intro') }}</p>
           <p class="study-note">
-            <b>Lưu ý:</b> Microsoft đã cho AI-900 nghỉ hưu ngày 30/06/2026 và thay bằng
-            <a [href]="ai901Url" target="_blank" rel="noopener">AI-901</a>; chứng chỉ nhận được vẫn
-            là <i>Azure AI Fundamentals</i>. Kiến thức nền bên dưới vẫn dùng được cho AI-901.
+            <b>{{ i18n.t('study.noteLabel') }}</b> {{ i18n.t('study.noteBefore') }}
+            <a [href]="ai901Url" target="_blank" rel="noopener">AI-901</a
+            >{{ i18n.t('study.noteAfter') }}
           </p>
+          @if (quiz.extraTotal()) {
+            <p class="extra-note">
+              <b>{{ i18n.t('study.extraLabel') }}</b>
+              {{ i18n.t('study.extraNote', { n: quiz.extraTotal() }) }}
+              <button class="btn sm extra-btn" (click)="practice(catExtra)">
+                {{ i18n.t('study.practiceTopic', { n: quiz.extraTotal() }) }}
+              </button>
+            </p>
+          }
         </div>
       </div>
 
-      @for (d of domains; track d.id) {
+      @for (d of domains(); track d.id) {
         <div class="card domain">
           <div class="card-head">
             <span class="qnum">{{ d.weight }}</span>
             <span class="dm-title">{{ d.title }}</span>
             <span class="spacer"></span>
             @if (cov().domains[d.id]; as c) {
-              <span class="tag hide-sm">{{ c.total }} CÂU</span>
+              <span class="tag hide-sm">{{ i18n.t('study.count', { n: c.total }) }}</span>
+              @if (c.extra) {
+                <span class="tag extra-tag hide-sm">
+                  {{ i18n.t('study.extraCount', { n: c.extra }) }}
+                </span>
+              }
               @if (c.total) {
-                <span class="tag hide-sm">ĐÃ LÀM {{ c.done }}/{{ c.total }}</span>
+                <span class="tag hide-sm">
+                  {{ i18n.t('study.doneCount', { done: c.done, total: c.total }) }}
+                </span>
               }
             }
             <button
@@ -49,7 +61,7 @@ import { QuizService } from '../core/quiz.service';
               [disabled]="!cov().domains[d.id].total"
               (click)="practice(d.id)"
             >
-              Thi phần này
+              {{ i18n.t('study.practiceDomain') }}
             </button>
           </div>
 
@@ -57,10 +69,7 @@ import { QuizService } from '../core/quiz.service';
             <p class="dm-obj">{{ d.objective }}</p>
             <p>{{ d.intro }}</p>
             @if (cov().domains[d.id].total === 0) {
-              <p class="warn-box">
-                Ngân hàng câu hỏi hiện tại không có câu nào cho phần này — hãy học qua các link tài
-                liệu bên dưới.
-              </p>
+              <p class="warn-box">{{ i18n.t('study.noQuestions') }}</p>
             } @else {
               <div class="cov-bar" [title]="covTitle(d.id)">
                 <i class="cv-ok" [style.width.%]="pct(cov().domains[d.id].ok, cov().domains[d.id].total)"></i>
@@ -83,12 +92,17 @@ import { QuizService } from '../core/quiz.service';
                     <span class="tw">{{ isOpen(t.id) ? '▾' : '▸' }}</span>
                     <span class="tt">{{ t.title }}</span>
                     @if (cov().topics[t.id]; as tc) {
+                      @if (tc.extra) {
+                        <span class="tcount textra" [title]="i18n.t('legend.extra')">
+                          ★{{ tc.extra }}
+                        </span>
+                      }
                       @if (tc.total) {
                         <span class="tcount" [class.tdone]="tc.done === tc.total">
                           {{ tc.done }}/{{ tc.total }}
                         </span>
                       } @else {
-                        <span class="tcount tnone">0 câu</span>
+                        <span class="tcount tnone">{{ i18n.t('study.zeroTopic') }}</span>
                       }
                     }
                   </button>
@@ -105,7 +119,7 @@ import { QuizService } from '../core/quiz.service';
                         }
                         @if (cov().topics[t.id].total) {
                           <button class="btn sm" (click)="practice(t.id)">
-                            Thi chủ đề này ({{ cov().topics[t.id].total }})
+                            {{ i18n.t('study.practiceTopic', { n: cov().topics[t.id].total }) }}
                           </button>
                         }
                       </div>
@@ -126,6 +140,13 @@ import { QuizService } from '../core/quiz.service';
     .study-body p:last-child { margin: 0; }
     .study-note { font-size: calc(13.5px * var(--cs)); color: var(--ink3); border-left: 3px solid var(--warn-line); padding-left: 12px; }
     .study-note a { color: var(--amber); }
+    .extra-note {
+      font-size: calc(13.5px * var(--cs)); color: var(--extra);
+      background: var(--extra-bg); border: 1px dashed var(--extra-line);
+      border-radius: 10px; padding: 11px 14px;
+    }
+    .extra-btn { margin-left: 6px; vertical-align: middle; }
+    .extra-tag { color: var(--extra); border-color: var(--extra-line); background: var(--extra-bg); font-weight: 600; }
     .dm-title { font-weight: 650; font-size: 15px; color: var(--ink); }
     .dm-obj { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .02em; color: var(--ink3); text-transform: none; }
     .warn-box { background: var(--warn-bg); border: 1px solid var(--warn-line); color: var(--warn); border-radius: 9px; padding: 10px 13px; font-size: calc(13.5px * var(--cs)); }
@@ -149,6 +170,7 @@ import { QuizService } from '../core/quiz.service';
     .tcount { font-family: var(--f-mono); font-size: 11px; color: var(--ink3); border: 1px solid var(--line2); border-radius: 20px; padding: 2px 8px; flex: 0 0 auto; }
     .tcount.tdone { color: var(--ok); border-color: var(--ok-line); }
     .tcount.tnone { opacity: .55; }
+    .tcount.textra { color: var(--extra); border-color: var(--extra-line); background: var(--extra-bg); }
     .topic-body { padding: 0 14px 14px 36px; animation: topicIn .28s var(--ease) backwards; }
     @keyframes topicIn { from { opacity: 0; transform: translateY(-7px); } to { opacity: 1; transform: none; } }
     .t-obj { margin: 0 0 8px; font-family: var(--f-mono); font-size: 11px; color: var(--ink3); }
@@ -162,12 +184,34 @@ import { QuizService } from '../core/quiz.service';
   `,
 })
 export class StudyComponent {
-  private readonly quiz = inject(QuizService);
+  readonly quiz = inject(QuizService);
+  readonly i18n = inject(I18nService);
 
-  readonly domains = DOMAINS;
   readonly studyGuideUrl = STUDY_GUIDE_URL;
   readonly ai901Url = AI901_URL;
   readonly cov = this.quiz.coverage;
+  readonly catExtra = CAT_EXTRA;
+
+  /** danh mục đã chọn sẵn ngôn ngữ hiển thị cho tiêu đề và mô tả */
+  readonly domains = computed(() =>
+    DOMAINS.map((d) => ({
+      id: d.id,
+      weight: d.weight,
+      objective: d.objective,
+      title: this.i18n.pick(d.title, d.titleEn),
+      intro: this.i18n.pick(d.intro, d.introEn),
+      groups: d.groups.map((g) => ({
+        title: g.title,
+        topics: g.topics.map((t) => ({
+          id: t.id,
+          objective: t.objective,
+          links: t.links,
+          title: this.i18n.pick(t.title, t.titleEn),
+          overview: this.i18n.pick(t.overview, t.overviewEn),
+        })),
+      })),
+    })),
+  );
 
   private readonly open = signal<Record<string, boolean>>({});
 
@@ -189,7 +233,12 @@ export class StudyComponent {
 
   covTitle(id: string): string {
     const c = this.cov().domains[id];
-    return `Đúng ${c.ok} · Sai ${c.no} · Đã xem đáp án ${c.sh} · Chưa làm ${c.total - c.done}`;
+    return this.i18n.t('study.covTitle', {
+      ok: c.ok,
+      no: c.no,
+      sh: c.sh,
+      todo: c.total - c.done,
+    });
   }
 
   /** Chuyển sang màn luyện tập, lọc đúng phần thi / chủ đề vừa chọn. */

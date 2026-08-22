@@ -3,6 +3,7 @@ import { Question, ViPart } from '../core/models';
 import { flow, letterFor } from '../core/text.util';
 import { QuizService } from '../core/quiz.service';
 import { TranslateService } from '../core/translate.service';
+import { I18nService } from '../core/i18n.service';
 
 /** Khối hiển thị bản dịch tiếng Việt cho câu hỏi hoặc phần giải thích. */
 @Component({
@@ -11,13 +12,13 @@ import { TranslateService } from '../core/translate.service';
   template: `
     @if (show()) {
       <div class="vi" [class.small]="small()">
+        <span class="vi-tag">{{ i18n.t('vi.badge') }}</span>
         @if (busy()) {
-          <span class="spin"></span> Đang dịch…
+          <span class="spin"></span> {{ i18n.t('vi.busy') }}
         } @else if (error(); as err) {
-          <span class="vi-err">
-            Không dịch được ({{ err }}). Tính năng dịch cần chạy trong giao diện Claude.ai và có kết
-            nối mạng.
-          </span>
+          <span class="vi-err">{{ i18n.t('vi.error', { err }) }}</span>
+        } @else if (missing()) {
+          <span class="vi-err">{{ i18n.t('vi.missing') }}</span>
         } @else {
           @if (part() === 'q') {
             @for (p of qParas(); track $index) {
@@ -60,21 +61,31 @@ export class ViBoxComponent {
 
   private readonly quiz = inject(QuizService);
   private readonly tr = inject(TranslateService);
+  readonly i18n = inject(I18nService);
 
   private readonly entry = computed(() => this.tr.entry(this.question().id, this.part()));
   readonly busy = computed(() => this.tr.isBusy(this.question().id, this.part()));
   readonly error = computed(() => this.entry()?.__error);
 
-  /** Chỉ hiện khi bật VI và đang dịch hoặc đã có kết quả — giống bản gốc. */
+  /** có nội dung dịch thật sự để hiển thị hay không */
+  private readonly hasContent = computed(() =>
+    this.part() === 'q'
+      ? this.qParas().length > 0 || this.qOptions().length > 0 || this.qSubs().length > 0
+      : this.eBlocks().some((b) => b.length > 0),
+  );
+
+  /** bật song ngữ nhưng câu này chưa có bản dịch nào kèm sẵn */
+  readonly missing = computed(() => !this.busy() && !this.error() && !this.hasContent());
+
+  /**
+   * Hiện khi bật song ngữ. Với phần giải thích, chỉ hiện khi thực sự có nội dung —
+   * không làm phiền bằng thông báo "chưa có bản dịch" cho câu vốn không có giải thích.
+   */
   readonly show = computed(() => {
     if (!this.quiz.showVi()) return false;
-    if (this.busy()) return true;
-    const v = this.entry();
-    if (!v) return false;
-    if (v.__error) return true;
-    return this.part() === 'q'
-      ? this.qParas().length > 0 || this.qOptions().length > 0 || this.qSubs().length > 0
-      : this.eBlocks().some((b) => b.length > 0);
+    if (this.busy() || this.error()) return true;
+    if (this.hasContent()) return true;
+    return this.part() === 'q';
   });
 
   readonly qParas = computed(() => flow(this.entry()?.question ?? []));
