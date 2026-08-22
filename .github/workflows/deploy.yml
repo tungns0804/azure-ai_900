@@ -5,10 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Cần quyền ghi để đẩy bản build sang nhánh gh-pages.
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 # Chỉ cho phép 1 lượt deploy chạy tại một thời điểm.
 concurrency:
@@ -16,41 +15,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
 
-      - name: Configure Pages
-        id: pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
       - run: npm ci
 
-      # base-href phải khớp đường dẫn con của GitHub Pages (vd: /azure-ai_900/)
+      # base-href phải khớp đường dẫn con của GitHub Pages: /<tên-repo>/
       - name: Build
-        run: npm run build -- --configuration production --base-href "${{ steps.pages.outputs.base_path }}/"
+        run: npm run build -- --configuration production --base-href "/${{ github.event.repository.name }}/"
 
-      # Bỏ qua xử lý Jekyll để các file bắt đầu bằng "_" không bị loại.
-      - run: touch dist/ai900-app/browser/.nojekyll
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist/ai900-app/browser
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Publish to gh-pages
+        working-directory: dist/ai900-app/browser
+        run: |
+          touch .nojekyll   # tắt Jekyll để file bắt đầu bằng "_" không bị loại
+          git init -b gh-pages
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Deploy ${{ github.sha }}"
+          git push --force \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
+            gh-pages

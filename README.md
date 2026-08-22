@@ -3,6 +3,8 @@
 Bản Angular của `ai900-practice.html` (file HTML 1 MB ban đầu). Giữ nguyên **toàn bộ** tính năng,
 giao diện và định dạng dữ liệu lưu trữ của bản gốc.
 
+**Bản chạy trực tiếp:** https://tungns0804.github.io/azure-ai_900/
+
 ## Chạy
 
 ```bash
@@ -75,3 +77,9 @@ Chạy ở localhost sẽ bị CORS chặn và ứng dụng hiển thị đúng 
 Muốn dùng ở môi trường khác thì trỏ `VI_API.endpoint` trong
 [`src/app/core/translate.service.ts`](src/app/core/translate.service.ts) sang proxy backend của bạn
 (nơi giữ API key). **Đừng** đặt API key trong mã chạy ở trình duyệt.
+
+## Triển khai
+
+Mỗi lần đẩy lên nhánh `main`, workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)
+sẽ build bản production với `--base-href /azure-ai_900/` rồi đẩy thư mục `dist/ai900-app/browser`
+sang nhánh `gh-pages` — đây là nhánh GitHub Pages đang phục vụ. Không cần thao tác tay.
