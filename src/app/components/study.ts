@@ -130,20 +130,27 @@ import { QuizService } from '../core/quiz.service';
     .dm-obj { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .02em; color: var(--ink3); text-transform: none; }
     .warn-box { background: var(--warn-bg); border: 1px solid var(--warn-line); color: var(--warn); border-radius: 9px; padding: 10px 13px; font-size: calc(13.5px * var(--cs)); }
     .cov-bar { display: flex; height: 6px; border-radius: 4px; overflow: hidden; background: var(--line); }
-    .cov-bar i { display: block; height: 100%; }
+    .cov-bar i { display: block; height: 100%; transition: width .45s var(--ease); }
     .cv-ok { background: var(--ok); } .cv-no { background: var(--bad); } .cv-sh { background: var(--warn); }
     .group { border-top: 1px solid var(--line); padding: 14px 20px; }
     .group-h { margin: 0 0 10px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .11em; text-transform: uppercase; color: var(--ink3); font-weight: 600; }
-    .topic { border: 1px solid var(--line); border-radius: 10px; margin-bottom: 7px; background: var(--panel2); overflow: hidden; }
+    .topic {
+      border: 1px solid var(--line); border-radius: 10px; margin-bottom: 7px;
+      background: var(--panel2); overflow: hidden;
+      transition: border-color var(--t-fast), box-shadow var(--t-fast);
+    }
+    .topic:hover { border-color: var(--line2); box-shadow: var(--shadow-sm); }
     .topic:last-child { margin-bottom: 0; }
     .topic-head { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: 0; padding: 11px 14px; font-size: calc(14px * var(--cs)); color: var(--ink); }
-    .topic-head:hover { color: var(--amber); }
+    .topic-head { transition: color var(--t-fast), background var(--t-fast); }
+    .topic-head:hover { color: var(--amber); background: color-mix(in srgb, var(--amber) 6%, transparent); }
     .tw { font-family: var(--f-mono); color: var(--ink3); flex: 0 0 auto; }
     .tt { flex: 1; min-width: 0; }
     .tcount { font-family: var(--f-mono); font-size: 11px; color: var(--ink3); border: 1px solid var(--line2); border-radius: 20px; padding: 2px 8px; flex: 0 0 auto; }
     .tcount.tdone { color: var(--ok); border-color: var(--ok-line); }
     .tcount.tnone { opacity: .55; }
-    .topic-body { padding: 0 14px 14px 36px; }
+    .topic-body { padding: 0 14px 14px 36px; animation: topicIn .28s var(--ease) backwards; }
+    @keyframes topicIn { from { opacity: 0; transform: translateY(-7px); } to { opacity: 1; transform: none; } }
     .t-obj { margin: 0 0 8px; font-family: var(--f-mono); font-size: 11px; color: var(--ink3); }
     .t-ov { margin: 0 0 12px; font-size: calc(14px * var(--cs)); line-height: 1.7; color: var(--ink2); }
     .t-links { display: flex; gap: 7px; flex-wrap: wrap; }

@@ -23,12 +23,14 @@ import { StudyComponent } from './components/study';
     .viewtabs button {
       background: var(--panel); border: 0; padding: 6px 13px;
       font-size: 12.5px; font-weight: 550; color: var(--ink2);
+      transition: background var(--t-fast), color var(--t-fast);
     }
     .viewtabs button + button { border-left: 1px solid var(--line2); }
-    .viewtabs button:hover { color: var(--amber); }
+    .viewtabs button:hover { color: var(--amber); background: var(--panel2); }
     .viewtabs button.on { background: var(--accent-bg); color: var(--accent-ink); font-weight: 650; }
     .scope-bar {
       display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-bottom: 14px;
+      animation: scopeIn .3s var(--ease) backwards;
       background: color-mix(in srgb, var(--amber) 10%, var(--panel));
       border: 1px dashed color-mix(in srgb, var(--amber) 50%, transparent);
       border-radius: 10px; padding: 9px 14px; font-size: 13.5px; color: var(--ink);
@@ -39,6 +41,7 @@ import { StudyComponent } from './components/study';
     }
     .scope-n { font-family: var(--f-mono); font-size: 12px; color: var(--ink3); }
     .study-wrap { padding-bottom: 40px; }
+    @keyframes scopeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
   `,
 })
 export class App {

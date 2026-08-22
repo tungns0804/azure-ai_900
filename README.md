@@ -47,7 +47,7 @@ cảnh báo này ngay trên phần d5 để bạn biết phải tự học qua l
 public/ai900-data.json     115 câu hỏi (kèm ảnh slide base64, có domain + topic) — tải lúc khởi động
 src/app/core/categories.ts danh mục 5 phần thi / 51 chủ đề + mô tả + link Microsoft Learn
 src/fonts.css              @font-face nhúng base64 (InterVar, PlexMono) — copy nguyên từ bản gốc
-src/base.css               toàn bộ CSS của bản gốc, không sửa một dòng nào
+src/base.css               CSS gốc + lớp tinh chỉnh: thanh cuộn, chiều sâu, chuyển động
 src/app/core/
   models.ts                kiểu dữ liệu câu hỏi, tiến độ, phiên, lịch sử
   text.util.ts             flow() nối dòng ngắt từ PDF, shuffle(), fmtDate()

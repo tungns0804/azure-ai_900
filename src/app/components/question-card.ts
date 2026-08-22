@@ -9,7 +9,8 @@ import { ViBoxComponent } from './vi-box';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ViBoxComponent],
   template: `
-    @if (quiz.current(); as q) {
+    <!-- track theo q.id: đổi câu là Angular dựng lại thẻ, nhờ vậy hiệu ứng vào chạy lại -->
+    @for (q of currentList(); track q.id) {
       <div class="card">
         <div class="card-head">
           <span class="qnum">CÂU {{ q.id }}</span>
@@ -146,7 +147,7 @@ import { ViBoxComponent } from './vi-box';
           }
         </div>
       </div>
-    } @else {
+    } @empty {
       <div class="card">
         <div class="qtext">
           Không có câu hỏi nào trong chế độ <b>{{ quiz.modeName(quiz.mode()) }}</b
@@ -173,6 +174,12 @@ export class QuestionCardComponent {
   readonly isFav = computed(() => {
     const q = this.quiz.current();
     return !!q && !!this.quiz.fav()[q.id];
+  });
+
+  /** current() bọc thành mảng 0–1 phần tử để @for dựng lại thẻ mỗi khi đổi câu */
+  readonly currentList = computed(() => {
+    const q = this.quiz.current();
+    return q ? [q] : [];
   });
 
   readonly questionParas = computed(() => flow(this.quiz.current()?.question ?? []));

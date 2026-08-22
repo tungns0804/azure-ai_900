@@ -186,20 +186,24 @@ const MODES: Array<{ key: Mode; label: string }> = [
     .catsel {
       width: 100%; background: var(--panel); border: 1px solid var(--line2);
       border-radius: 8px; padding: 7px 9px; font-size: 12.5px; margin-bottom: 8px;
+      transition: border-color var(--t-fast), box-shadow var(--t-fast);
     }
-    .catsel:hover { border-color: var(--amber); }
+    .catsel:hover { border-color: var(--amber); box-shadow: var(--shadow-sm); }
     .catnow {
       display: flex; align-items: center; gap: 8px; margin-bottom: 18px;
       background: color-mix(in srgb, var(--amber) 12%, var(--panel));
       border: 1px solid color-mix(in srgb, var(--amber) 45%, transparent);
       border-radius: 8px; padding: 6px 10px; font-size: 12px; color: var(--ink);
+      animation: catIn .28s var(--ease) backwards;
     }
     .catnow span { flex: 1; min-width: 0; }
     .catclear {
       background: none; border: 0; color: var(--ink3); font-size: 13px;
       padding: 0 2px; line-height: 1; flex: 0 0 auto;
+      transition: color var(--t-fast), transform var(--t-fast);
     }
-    .catclear:hover { color: var(--bad); }
+    .catclear:hover { color: var(--bad); transform: rotate(90deg); }
+    @keyframes catIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
   `,
 })
 export class SidebarComponent {
