@@ -1,0 +1,147 @@
+<div class="app">
+  <aside id="sidebar" [class.open]="sideOpen()">
+    <app-sidebar
+      (navigated)="closeSide()"
+      (openImport)="openImport()"
+      (openReset)="resetDlg.showModal()"
+    />
+  </aside>
+
+  <main>
+    <div class="topwrap">
+      <div class="topbar">
+        <button class="btn sm" id="menuBtn" (click)="sideOpen.set(true)">☰ Danh sách</button>
+        <div class="viewtabs" role="group" aria-label="Màn hình">
+          <button
+            [class.on]="quiz.view() === 'practice'"
+            [attr.aria-pressed]="quiz.view() === 'practice'"
+            (click)="quiz.setView('practice')"
+          >
+            Luyện thi
+          </button>
+          <button
+            [class.on]="quiz.view() === 'study'"
+            [attr.aria-pressed]="quiz.view() === 'study'"
+            (click)="quiz.setView('study')"
+          >
+            Học kiến thức
+          </button>
+        </div>
+        <div class="sep hide-sm"></div>
+        <div class="stat">Đã làm <b>{{ quiz.stats().done }}/{{ quiz.stats().total }}</b></div>
+        <div class="stat good hide-sm">Đúng <b>{{ quiz.stats().ok }}</b></div>
+        <div class="stat bad hide-sm">Sai <b>{{ quiz.stats().no }}</b></div>
+        <div class="stat hide-sm">Tỉ lệ <b>{{ quiz.stats().rate }}</b></div>
+        <span class="spacer"></span>
+        <div class="sizectl" role="group" aria-label="Cỡ chữ">
+          <button
+            title="Giảm cỡ chữ"
+            aria-label="Giảm cỡ chữ"
+            [disabled]="quiz.size() === 'md'"
+            (click)="quiz.stepSize(-1)"
+          >
+            A−
+          </button>
+          <button
+            title="Tăng cỡ chữ"
+            aria-label="Tăng cỡ chữ"
+            [disabled]="quiz.size() === 'xl'"
+            (click)="quiz.stepSize(1)"
+          >
+            A+
+          </button>
+        </div>
+        <button
+          class="btn sm"
+          [attr.aria-pressed]="quiz.showVi()"
+          title="Hiện bản dịch tiếng Việt"
+          (click)="quiz.toggleVi()"
+        >
+          {{ quiz.showVi() ? 'VI: Bật' : 'VI: Tắt' }}
+        </button>
+        <button class="btn sm" (click)="quiz.toggleTheme()">
+          {{ quiz.theme() === 'dark' ? 'Nền sáng' : 'Nền tối' }}
+        </button>
+      </div>
+      <div class="bar"><i [style.width.%]="quiz.stats().pct"></i></div>
+    </div>
+
+    <div class="wrap" [class.study-wrap]="quiz.view() === 'study'">
+      @if (quiz.view() === 'study') {
+        <app-study />
+      } @else {
+        @if (quiz.categoryLabel(); as label) {
+          <div class="scope-bar">
+            <span class="scope-lbl">Phạm vi</span>
+            <b>{{ label }}</b>
+            <span class="scope-n">{{ quiz.order().length }} câu</span>
+            <span class="spacer"></span>
+            <button class="btn sm" (click)="quiz.setCategory(null)">Bỏ lọc</button>
+          </div>
+        }
+        <app-question-card (zoom)="openZoom($event)" />
+      }
+    </div>
+
+    @if (quiz.view() === 'practice') {
+      <div class="navbar">
+        <button class="btn" [disabled]="!quiz.canPrev()" (click)="quiz.go(quiz.idx() - 1)">
+          ← Câu trước
+        </button>
+        <button class="btn" [disabled]="!quiz.canNext()" (click)="quiz.go(quiz.idx() + 1)">
+          Câu sau →
+        </button>
+        <span class="spacer"></span>
+        <span class="pos">
+          {{ quiz.order().length ? quiz.idx() + 1 : 0 }} / {{ quiz.order().length }}
+        </span>
+      </div>
+    }
+  </main>
+</div>
+
+<div class="scrim" [class.on]="sideOpen()" (click)="closeSide()"></div>
+
+<div class="toast" [class.show]="toast.visible()" role="status" aria-live="polite">
+  {{ toast.message() }}
+</div>
+
+<dialog #zoomDlg id="zoomDlg">
+  <div class="dlg-h">Slide gốc</div>
+  <div class="dlg-b"><img [src]="zoomSrc()" alt="Slide gốc phóng to" /></div>
+  <div class="dlg-f"><button class="btn" (click)="zoomDlg.close()">Đóng</button></div>
+</dialog>
+
+<dialog #impDlg>
+  <div class="dlg-h">Nhập dữ liệu tiến độ</div>
+  <div class="dlg-b">
+    <p>Chọn file JSON đã xuất trước đó, hoặc dán nội dung vào ô bên dưới.</p>
+    <input
+      type="file"
+      accept="application/json,.json"
+      style="margin-bottom:10px"
+      (change)="readFile($event)"
+    />
+    <textarea
+      [value]="importText()"
+      (input)="importText.set(textValue($event))"
+      placeholder='{"favorites":[...],"progress":{...},"history":[...]}'
+    ></textarea>
+  </div>
+  <div class="dlg-f">
+    <button class="btn" (click)="impDlg.close()">Huỷ</button>
+    <button class="btn primary" (click)="confirmImport()">Nhập dữ liệu</button>
+  </div>
+</dialog>
+
+<dialog #resetDlg>
+  <div class="dlg-h">Xoá toàn bộ tiến độ?</div>
+  <div class="dlg-b">
+    Thao tác này xoá câu yêu thích, kết quả từng câu và toàn bộ lịch sử luyện tập. Không thể hoàn
+    tác. Nên bấm “Xuất JSON” trước nếu bạn muốn giữ lại.
+  </div>
+  <div class="dlg-f">
+    <button class="btn" (click)="resetDlg.close()">Giữ lại</button>
+    <button class="btn primary" (click)="quiz.resetAll(); resetDlg.close()">Xoá tất cả</button>
+  </div>
+</dialog>
