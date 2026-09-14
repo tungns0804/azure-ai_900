@@ -1,11 +1,24 @@
 <!doctype html>
-<html lang="vi" data-theme="dark" data-size="md">
+<html lang="vi" data-size="md">
 <head>
   <meta charset="utf-8">
   <title>AI-900 Practice · Azure AI Fundamentals</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    // Áp tông màu + cỡ chữ đã lưu NGAY trước khi Angular khởi động, nếu không trang chớp màu hệ
+    // thống một nhịp rồi mới đổi. Giữ đồng bộ với THEMES (core/theme.ts) và QuizService.save().
+    try {
+      var st = (JSON.parse(localStorage.getItem('ai900:data:v1') || 'null') || {}).settings || {};
+      if (st.theme === 'light' || st.theme === 'dark' || st.theme === 'night') {
+        document.documentElement.setAttribute('data-theme', st.theme);
+      }
+      if (st.size === 'lg' || st.size === 'xl') document.documentElement.setAttribute('data-size', st.size);
+      if (st.lang === 'en') document.documentElement.lang = 'en';
+    } catch (e) { /* localStorage bị chặn thì theo mặc định */ }
+  </script>
 </head>
 <body>
   <app-root></app-root>

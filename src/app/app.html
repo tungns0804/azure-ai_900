@@ -81,33 +81,45 @@
         >
           {{ quiz.showVi() ? i18n.t('top.viOn') : i18n.t('top.viOff') }}
         </button>
-        <button class="btn sm" (click)="quiz.toggleTheme()">
-          {{ quiz.theme() === 'dark' ? i18n.t('top.themeLight') : i18n.t('top.themeDark') }}
+        <button
+          class="btn sm theme-btn"
+          [title]="themeTitle()"
+          [attr.aria-label]="themeTitle()"
+          (click)="quiz.cycleTheme()"
+        >
+          <app-icon [name]="themeIcon()" />
+          <span class="theme-label">{{ themeLabel() }}</span>
         </button>
       </div>
       <div class="bar"><i [style.width.%]="quiz.stats().pct"></i></div>
     </div>
 
     <div class="wrap" [class.study-wrap]="quiz.view() === 'study'">
-      @if (quiz.view() === 'study') {
-        <app-study />
-      } @else {
-        @if (quiz.categoryLabel(); as label) {
+      <!-- chờ init() nạp xong tiến độ: khung thiết lập lấy bản nháp từ giá trị đã lưu -->
+      @if (quiz.ready()) {
+        @if (quiz.view() === 'study') {
+          <app-study />
+        } @else if (!quiz.started()) {
+          <app-setup />
+        } @else {
           <div class="scope-bar">
             <span class="scope-lbl">{{ i18n.t('scope.label') }}</span>
-            <b>{{ label }}</b>
-            <span class="scope-n">{{ i18n.t('common.questions', { n: quiz.order().length }) }}</span>
+            <b>{{ quiz.categoryLabel() ?? i18n.t('setup.scopeAllShort') }}</b>
+            <span class="scope-n">
+              {{ quiz.modeName(quiz.mode()) }} ·
+              {{ i18n.t('common.questions', { n: quiz.order().length }) }}
+            </span>
             <span class="spacer"></span>
-            <button class="btn sm" (click)="quiz.setCategory(null)">
-              {{ i18n.t('common.clearFilter') }}
+            <button class="btn sm" (click)="quiz.openSetup()">
+              <app-icon name="sliders" /> {{ i18n.t('setup.change') }}
             </button>
           </div>
+          <app-question-card (zoom)="openZoom($event)" />
         }
-        <app-question-card (zoom)="openZoom($event)" />
       }
     </div>
 
-    @if (quiz.view() === 'practice') {
+    @if (quiz.view() === 'practice' && quiz.started()) {
       <div class="navbar">
         <button class="btn" [disabled]="!quiz.canPrev()" (click)="quiz.go(quiz.idx() - 1)">
           ← {{ i18n.t('nav.prev') }}

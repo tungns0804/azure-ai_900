@@ -3,6 +3,7 @@ import {
   Component,
   ElementRef,
   HostListener,
+  computed,
   inject,
   signal,
   viewChild,
@@ -10,14 +11,17 @@ import {
 import { QuizService } from './core/quiz.service';
 import { ToastService } from './core/toast.service';
 import { I18nService } from './core/i18n.service';
+import { THEME_ICON, THEME_LABEL, nextTheme } from './core/theme';
 import { SidebarComponent } from './components/sidebar';
 import { QuestionCardComponent } from './components/question-card';
 import { StudyComponent } from './components/study';
+import { SetupComponent } from './components/setup';
+import { IconComponent } from './components/icon';
 
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SidebarComponent, QuestionCardComponent, StudyComponent],
+  imports: [SidebarComponent, QuestionCardComponent, StudyComponent, SetupComponent, IconComponent],
   templateUrl: './app.html',
   styles: `
     .viewtabs { display: flex; border: 1px solid var(--line2); border-radius: 8px; overflow: hidden; }
@@ -28,16 +32,17 @@ import { StudyComponent } from './components/study';
     }
     .viewtabs button + button { border-left: 1px solid var(--line2); }
     .viewtabs button:hover { color: var(--amber); background: var(--panel2); }
-    .viewtabs button.on { background: var(--accent-bg); color: var(--accent-ink); font-weight: 650; }
+    /* tab đang mở dùng màu thương hiệu: "đang ở đâu" — màu nhấn xanh lá dành cho "làm gì tiếp" */
+    .viewtabs button.on { background: var(--brand-soft); color: var(--brand); font-weight: 650; }
     .langctl button {
       font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .06em; padding: 6px 10px;
     }
     .scope-bar {
       display: flex; align-items: center; gap: 9px; flex-wrap: wrap; margin-bottom: 14px;
       animation: scopeIn .3s var(--ease) backwards;
-      background: color-mix(in srgb, var(--amber) 10%, var(--panel));
-      border: 1px dashed color-mix(in srgb, var(--amber) 50%, transparent);
-      border-radius: 10px; padding: 9px 14px; font-size: 13.5px; color: var(--ink);
+      background: color-mix(in srgb, var(--amber) 8%, var(--panel));
+      border: 1px dashed color-mix(in srgb, var(--amber) 45%, transparent);
+      border-radius: 10px; padding: 8px 10px 8px 14px; font-size: 13.5px; color: var(--ink);
     }
     .scope-lbl {
       font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .11em;
@@ -45,6 +50,7 @@ import { StudyComponent } from './components/study';
     }
     .scope-n { font-family: var(--f-mono); font-size: 12px; color: var(--ink3); }
     .study-wrap { padding-bottom: 40px; }
+    @media (max-width: 480px) { .theme-label { display: none; } }
     @keyframes scopeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
   `,
 })
@@ -56,6 +62,16 @@ export class App {
   readonly sideOpen = signal(false);
   readonly zoomSrc = signal('');
   readonly importText = signal('');
+
+  /** nút giao diện: đang dùng tông nào, bấm thì sang tông nào */
+  readonly themeIcon = computed(() => THEME_ICON[this.quiz.theme()]);
+  readonly themeLabel = computed(() => this.i18n.t(THEME_LABEL[this.quiz.theme()]));
+  readonly themeTitle = computed(() =>
+    this.i18n.t('theme.title', {
+      current: this.themeLabel(),
+      next: this.i18n.t(THEME_LABEL[nextTheme(this.quiz.theme())]),
+    }),
+  );
 
   private readonly zoomDlgRef =
     viewChild.required<ElementRef<HTMLDialogElement>>('zoomDlg');
@@ -94,8 +110,8 @@ export class App {
   /* ---------- phím tắt ---------- */
   @HostListener('document:keydown', ['$event'])
   onKey(e: KeyboardEvent): void {
-    // phím tắt chỉ áp dụng cho màn luyện thi
-    if (this.quiz.view() !== 'practice') return;
+    // phím tắt chỉ áp dụng khi đang làm bài ở màn luyện thi (không phải khung thiết lập)
+    if (this.quiz.view() !== 'practice' || !this.quiz.started()) return;
     const t = e.target as HTMLElement | null;
     if (t && typeof t.matches === 'function' && t.matches('input,textarea,select')) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;

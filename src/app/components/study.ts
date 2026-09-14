@@ -241,14 +241,8 @@ export class StudyComponent {
     });
   }
 
-  /** Chuyển sang màn luyện tập, lọc đúng phần thi / chủ đề vừa chọn. */
+  /** Mở khung thiết lập của màn luyện thi, chọn sẵn phần thi / chủ đề vừa bấm. */
   practice(cat: string): void {
-    this.quiz.setCategory(cat);
-    this.quiz.setView('practice');
-    try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch {
-      window.scrollTo(0, 0);
-    }
+    this.quiz.openSetup(cat);
   }
 }

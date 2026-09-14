@@ -172,6 +172,9 @@ import { ViBoxComponent } from './vi-box';
         </div>
         <div class="opts">
           <p class="empty">{{ i18n.t('card.emptyHint') }}</p>
+          <div>
+            <button class="btn sm" (click)="quiz.openSetup()">{{ i18n.t('setup.change') }}</button>
+          </div>
         </div>
       </div>
     }

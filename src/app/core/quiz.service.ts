@@ -12,7 +12,6 @@ import {
   Size,
   Status,
   StoredData,
-  Theme,
   View,
 } from './models';
 import { DOMAINS, DOMAIN_BY_ID, TOPIC_BY_ID } from './categories';
@@ -21,6 +20,15 @@ import { StorageService } from './storage.service';
 import { ToastService } from './toast.service';
 import { I18nService } from './i18n.service';
 import { I18nKey, Lang } from './i18n';
+import {
+  Theme,
+  applyTheme,
+  isTheme,
+  nextTheme,
+  prefersDark,
+  resolveTheme,
+  watchSystemDark,
+} from './theme';
 
 /** phạm vi ảo: chỉ câu bổ sung / chỉ câu gốc từ PDF */
 export const CAT_EXTRA = 'extra';
@@ -28,6 +36,18 @@ export const CAT_ORIGIN = 'origin';
 
 const K_DATA = 'ai900:data:v1';
 export const SIZES: Size[] = ['md', 'lg', 'xl'];
+/** các mức giới hạn số câu cho một lượt luyện */
+export const LIMITS: readonly number[] = [10, 20, 30, 50];
+
+/** lựa chọn của khung thiết lập, áp vào cùng lúc khi bấm Bắt đầu */
+export interface RoundConfig {
+  category: string | null;
+  mode: Mode;
+  limit: number | null;
+  shuffleQ: boolean;
+  shuffleO: boolean;
+  autoNext: boolean;
+}
 
 const MODE_KEYS: Record<string, I18nKey> = {
   all: 'mode.all',
@@ -44,6 +64,10 @@ const TYPE_KEYS: Record<string, I18nKey> = {
   yesno_table: 'type.yesno_table',
   match: 'type.match',
 };
+
+function isLimit(v: unknown): v is number {
+  return typeof v === 'number' && LIMITS.includes(v);
+}
 
 @Injectable({ providedIn: 'root' })
 export class QuizService {
@@ -70,8 +94,21 @@ export class QuizService {
   readonly shuffleO = signal(false);
   readonly autoNext = signal(false);
   readonly showVi = signal(false);
-  readonly theme = signal<Theme>('dark');
+  readonly theme = signal<Theme>('system');
   readonly size = signal<Size>('md');
+  private readonly systemDark = signal(prefersDark());
+  /** tông đang hiển thị: 'system' đã quy đổi thành sáng hoặc tối */
+  readonly resolvedTheme = computed(() => resolveTheme(this.theme(), this.systemDark()));
+
+  /** false = đang ở khung thiết lập trước khi làm bài */
+  readonly started = signal(false);
+  /** giới hạn số câu của lượt đang làm; null = tất cả */
+  readonly limit = signal<number | null>(null);
+  /**
+   * Phạm vi chọn sẵn cho khung thiết lập (màn hình Học kiến thức đặt khi bấm "Thi phần này").
+   * undefined = không gợi ý gì, dùng phạm vi đang áp dụng.
+   */
+  readonly setupCategory = signal<string | null | undefined>(undefined);
 
   readonly fav = signal<Record<number, boolean>>({});
   readonly prog = signal<Record<number, Progress>>({});
@@ -89,6 +126,14 @@ export class QuizService {
   /** tổng số câu hỏi bổ sung do ứng dụng biên soạn */
   readonly extraTotal = computed(() => this.questions().filter((q) => !!q.extra).length);
   readonly originTotal = computed(() => this.questions().filter((q) => !q.extra).length);
+
+  constructor() {
+    // để "Tự động" mà hệ điều hành đổi sáng/tối: CSS tự đổi màu, JS chỉ cập nhật màu thanh trình duyệt
+    watchSystemDark((dark) => {
+      this.systemDark.set(dark);
+      if (this.ready()) this.applyLook();
+    });
+  }
 
   /* ---------- dẫn xuất ---------- */
   readonly current = computed<Question | null>(() => {
@@ -142,13 +187,6 @@ export class QuizService {
     };
   });
 
-  readonly modeCounts = computed(() => ({
-    all: this.poolFor('all').length,
-    fav: this.poolFor('fav').length,
-    review: this.poolFor('review').length,
-    todo: this.poolFor('todo').length,
-  }));
-
   /** tiến độ theo từng phần thi và từng chủ đề, dùng cho màn hình Học kiến thức */
   readonly coverage = computed(() => {
     const prog = this.prog();
@@ -174,16 +212,13 @@ export class QuizService {
   });
 
   /** nhãn hiển thị cho bộ lọc đang áp dụng */
-  readonly categoryLabel = computed(() => {
-    const c = this.category();
-    if (!c) return null;
-    if (c === CAT_EXTRA) return this.i18n.t('scope.extra');
-    if (c === CAT_ORIGIN) return this.i18n.t('scope.origin');
-    const d = DOMAIN_BY_ID[c];
-    if (d) return this.i18n.pick(d.title, d.titleEn);
-    const t = TOPIC_BY_ID[c];
-    if (t) return this.i18n.pick(t.title, t.titleEn);
-    return c;
+  readonly categoryLabel = computed(() => this.labelFor(this.category()));
+
+  /** có lượt đang làm dở để quay lại từ khung thiết lập không */
+  readonly canResume = computed(() => {
+    const rev = this.revealed();
+    const pick = this.pick();
+    return this.order().some((id) => rev[id] || pick[id]?.length);
   });
 
   readonly canPrev = computed(() => this.idx() > 0);
@@ -212,13 +247,21 @@ export class QuizService {
       this.shuffleO.set(!!st.shuffleO);
       this.autoNext.set(!!st.autoNext);
       this.showVi.set(!!st.showVi);
-      this.theme.set(st.theme || 'dark');
+      this.theme.set(isTheme(st.theme) ? st.theme : 'system');
       this.size.set(SIZES.indexOf(st.size as Size) >= 0 ? (st.size as Size) : 'md');
       this.idx.set(st.idx || 0);
+      this.limit.set(isLimit(st.limit) ? st.limit : null);
+      // dữ liệu cũ chưa có trường này: vẫn vào thẳng câu đang làm như trước
+      this.started.set(st.started !== false);
     }
     if (!d) this.i18n.set('vi');
     this.applyLook();
-    this.buildOrder(false);
+    const saved = d?.order;
+    if (Array.isArray(saved) && saved.length && saved.every((id) => this.byId().has(id))) {
+      this.order.set(saved);
+    } else {
+      this.buildOrder();
+    }
     if (this.idx() >= this.order().length) this.idx.set(0);
     this.ready.set(true);
   }
@@ -228,6 +271,18 @@ export class QuizService {
     return (
       cat === CAT_EXTRA || cat === CAT_ORIGIN || !!DOMAIN_BY_ID[cat] || !!TOPIC_BY_ID[cat]
     );
+  }
+
+  /** nhãn hiển thị của một phạm vi; null = toàn bộ */
+  labelFor(c: string | null): string | null {
+    if (!c) return null;
+    if (c === CAT_EXTRA) return this.i18n.t('scope.extra');
+    if (c === CAT_ORIGIN) return this.i18n.t('scope.origin');
+    const d = DOMAIN_BY_ID[c];
+    if (d) return this.i18n.pick(d.title, d.titleEn);
+    const t = TOPIC_BY_ID[c];
+    if (t) return this.i18n.pick(t.title, t.titleEn);
+    return c;
   }
 
   /* ---------- ghi ---------- */
@@ -254,7 +309,10 @@ export class QuizService {
           theme: this.theme(),
           size: this.size(),
           idx: this.idx(),
+          started: this.started(),
+          limit: this.limit(),
         },
+        order: this.order(),
       } satisfies StoredData);
     }, 400);
   }
@@ -298,13 +356,13 @@ export class QuizService {
       .map((q) => q.id);
   }
 
-  buildOrder(keepCurrent: boolean): void {
-    const cur = this.order()[this.idx()];
-    const p = this.poolFor(this.mode());
-    const next = this.shuffleQ() ? shuffle(p) : p;
-    this.order.set(next);
-    const at = keepCurrent ? next.indexOf(cur) : -1;
-    this.idx.set(at >= 0 ? at : 0);
+  /** dựng lại thứ tự câu theo phạm vi, chế độ, trộn và giới hạn số câu; về câu đầu tiên */
+  buildOrder(): void {
+    const pool = this.poolFor(this.mode());
+    const all = this.shuffleQ() ? shuffle(pool) : pool;
+    const lim = this.limit();
+    this.order.set(lim ? all.slice(0, lim) : all);
+    this.idx.set(0);
   }
 
   typeLabel(t: string): string {
@@ -501,12 +559,10 @@ export class QuizService {
   go(i: number): void {
     if (i < 0 || i >= this.order().length) return;
     this.idx.set(i);
+    // bấm vào một câu (kể cả từ lưới ở thanh bên khi đang thiết lập) nghĩa là đang làm bài
+    this.started.set(true);
     this.save();
-    try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch {
-      window.scrollTo(0, 0);
-    }
+    this.scrollTop();
   }
 
   gotoId(id: number): boolean {
@@ -516,10 +572,11 @@ export class QuizService {
       return true;
     }
     if (this.byId().has(id)) {
-      // bỏ cả chế độ lọc lẫn phạm vi phần thi để chắc chắn mở được câu này
+      // bỏ cả chế độ lọc, phạm vi phần thi lẫn giới hạn số câu để chắc chắn mở được câu này
       this.mode.set('all');
       this.category.set(null);
-      this.buildOrder(false);
+      this.limit.set(null);
+      this.buildOrder();
       const j = this.order().indexOf(id);
       if (j >= 0) {
         this.go(j);
@@ -534,13 +591,49 @@ export class QuizService {
     return this.byId().has(id);
   }
 
-  /* ---------- tuỳ chọn ---------- */
-  setMode(m: Mode): void {
-    this.mode.set(m);
-    this.buildOrder(false);
-    this.save();
+  private scrollTop(): void {
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {
+      window.scrollTo(0, 0);
+    }
   }
 
+  /* ---------- khung thiết lập ---------- */
+  /** Áp lựa chọn của khung thiết lập rồi vào câu đầu tiên của lượt mới. */
+  startRound(cfg: RoundConfig): void {
+    this.category.set(cfg.category);
+    this.mode.set(cfg.mode);
+    this.limit.set(cfg.limit);
+    this.shuffleQ.set(cfg.shuffleQ);
+    this.shuffleO.set(cfg.shuffleO);
+    this.autoNext.set(cfg.autoNext);
+    this.optOrderCache.clear();
+    this.setupCategory.set(undefined);
+    this.buildOrder();
+    this.started.set(true);
+    this.save();
+    this.scrollTop();
+  }
+
+  /** Rời khung thiết lập, giữ nguyên lượt đang làm. */
+  resume(): void {
+    this.setupCategory.set(undefined);
+    this.started.set(true);
+    this.save();
+    this.scrollTop();
+  }
+
+  /** Mở khung thiết lập; `category` chọn sẵn phạm vi (từ màn hình Học kiến thức). */
+  openSetup(category?: string | null): void {
+    this.setupCategory.set(category);
+    this.view.set('practice');
+    this.started.set(false);
+    this.save();
+    this.scrollTop();
+  }
+
+  /* ---------- tuỳ chọn ---------- */
   setView(v: View): void {
     this.view.set(v);
     this.save();
@@ -554,27 +647,6 @@ export class QuizService {
     this.toast.show(this.i18n.t('toast.langChanged'));
   }
 
-  /**
-   * Đặt phạm vi ôn tập theo phần thi hoặc chủ đề (null = toàn bộ).
-   * Nếu phạm vi mới rỗng ở chế độ hiện tại thì tự quay về "Toàn bộ" để không kẹt màn hình trống.
-   */
-  setCategory(cat: string | null, opts: { silent?: boolean } = {}): void {
-    this.category.set(cat);
-    if (cat && this.poolFor(this.mode(), cat).length === 0) {
-      this.mode.set('all');
-    }
-    this.buildOrder(false);
-    this.save();
-    if (!opts.silent) {
-      const n = this.order().length;
-      this.toast.show(
-        cat
-          ? this.i18n.t('scope.set', { name: this.categoryLabel() ?? '', n })
-          : this.i18n.t('scope.cleared', { n }),
-      );
-    }
-  }
-
   /** Số câu hỏi có sẵn cho một phần thi / chủ đề, không phụ thuộc chế độ đang chọn. */
   countFor(cat: string): number {
     return this.poolFor('all', cat).length;
@@ -586,30 +658,14 @@ export class QuizService {
     return this.questions().filter((q) => q.extra && ids.has(q.id)).length;
   }
 
-  setShuffleQ(v: boolean): void {
-    this.shuffleQ.set(v);
-    this.buildOrder(true);
-    this.save();
-  }
-
-  setShuffleO(v: boolean): void {
-    this.shuffleO.set(v);
-    this.optOrderCache.clear();
-    this.save();
-  }
-
-  setAutoNext(v: boolean): void {
-    this.autoNext.set(v);
-    this.save();
-  }
-
   toggleVi(): void {
     this.showVi.set(!this.showVi());
     this.save();
   }
 
-  toggleTheme(): void {
-    this.theme.set(this.theme() === 'dark' ? 'light' : 'dark');
+  /** Xoay vòng Tự động → Sáng → Tối → Đèn đêm. */
+  cycleTheme(): void {
+    this.theme.set(nextTheme(this.theme()));
     this.applyLook();
     this.save();
   }
@@ -628,7 +684,7 @@ export class QuizService {
   }
 
   applyLook(): void {
-    document.documentElement.setAttribute('data-theme', this.theme());
+    applyTheme(this.theme(), this.resolvedTheme());
     document.documentElement.setAttribute('data-size', this.size());
   }
 
@@ -690,7 +746,7 @@ export class QuizService {
       this.shuffleO.set(!!d.settings.shuffleO);
       this.autoNext.set(!!d.settings.autoNext);
       this.showVi.set(!!d.settings.showVi);
-      this.theme.set(d.settings.theme || this.theme());
+      if (isTheme(d.settings.theme)) this.theme.set(d.settings.theme);
       if (SIZES.indexOf(d.settings.size as Size) >= 0) this.size.set(d.settings.size as Size);
     }
     const rev: Record<number, boolean> = {};
@@ -703,7 +759,7 @@ export class QuizService {
     this.revealed.set(rev);
     this.pick.set(pk);
     this.applyLook();
-    this.buildOrder(false);
+    this.buildOrder();
     this.save();
     this.toast.show(this.i18n.t('toast.imported'));
     return true;
@@ -717,7 +773,7 @@ export class QuizService {
     this.pick.set({});
     this.revealed.set({});
     this.optOrderCache.clear();
-    this.buildOrder(false);
+    this.buildOrder();
     this.save();
     this.toast.show(this.i18n.t('toast.resetDone'));
   }

@@ -1,43 +1,69 @@
+/* ---------- bảng màu ----------
+   Cùng bảng màu với minano_nihongo. Mỗi màu khai báo MỘT lần bằng light-dark(sáng, tối), nên đổi
+   tông chỉ cần đổi color-scheme:
+   - không có data-theme        -> color-scheme: light dark -> theo hệ điều hành ("Tự động")
+   - data-theme="light"/"dark"  -> ép sáng / ép tối
+   - data-theme="night"         -> đèn đêm: bảng màu ấm viết riêng ở khối dưới
+   data-theme do applyTheme() (core/theme.ts) đặt, và được khôi phục sớm trong index.html. */
 :root{
+  color-scheme:light dark;
   --f-ui:'InterVar','Segoe UI Variable Text','Segoe UI',-apple-system,BlinkMacSystemFont,system-ui,Roboto,Arial,sans-serif;
   --f-mono:'PlexMono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 
-  --bg:#0d1219; --bg2:#111a24; --panel:#16212d; --panel2:#1b2836;
-  --line:#243447; --line2:#31485f;
-  --ink:#eaf1f8; --ink2:#b0c3d4; --ink3:#7a8fa3;
-  --band:#26476b; --band-ink:#f2f7fc;
-  --amber:#f5c518; --accent-bg:#f5c518; --accent-ink:#181818; --ok:#78bd52; --ok-bg:#1b3320; --ok-line:#3d6b34;
-  --bad:#e8695e; --bad-bg:#37201e; --bad-line:#7a3a33;
-  --warn:#e9a83c; --warn-bg:#33280f; --warn-line:#7a5f22;
-  --star:#ffcb45;
-  /* câu hỏi BỔ SUNG — tím, cố tình khác hẳn màu vàng của ngân hàng gốc */
-  --extra:#b79bff; --extra-bg:#241f3a; --extra-line:#5b4a95;
-  --r:14px; --shadow:0 10px 30px rgba(0,0,0,.38);
+  /* nền trắng ngà ấm với chữ xanh than / nền navy gần đen */
+  --bg:light-dark(#faf9f7,#0f1318); --bg2:light-dark(#ffffff,#181d24);
+  --panel:light-dark(#ffffff,#181d24); --panel2:light-dark(#f3f1ee,#20262e);
+  --line:light-dark(#e6e1db,#2a313a); --line2:light-dark(#d2cac1,#3c4550);
+  /* ba bậc chữ đều ≥ 4.5:1 trên nền thẻ */
+  --ink:light-dark(#222d39,#edebe8); --ink2:light-dark(#4f5d70,#a0a6ae); --ink3:light-dark(#66727f,#868d97);
+  /* xanh thương hiệu cho khung ứng dụng (logo, tab đang mở) và dải chữ câu hỏi */
+  --brand:light-dark(#0057b8,#5c9be0); --brand-soft:light-dark(#e6eef8,#1e2f44);
+  --band:var(--brand-soft); --band-ink:var(--ink);
+  /* màu nhấn xanh lá cho thứ bấm được trong nội dung. --amber giữ tên cũ (hover, lựa chọn đang bật)
+     để không phải đổi hàng trăm chỗ dùng */
+  --amber:light-dark(#15855f,#2cc594); --accent-bg:var(--amber); --accent-ink:light-dark(#ffffff,#06140f);
+  --accent-ring:light-dark(rgb(21 133 95 / 16%),rgb(44 197 148 / 22%));
+  --ok:light-dark(#3d7a3d,#86c28f); --ok-bg:light-dark(#e9f3e7,#1b3223); --ok-line:light-dark(#a9d0a5,#3a6a45);
+  --bad:light-dark(#b3361f,#e0877b); --bad-bg:light-dark(#fcebe7,#3a1f1c); --bad-line:light-dark(#eba99c,#74392f);
+  --warn:light-dark(#94620b,#e0c77a); --warn-bg:light-dark(#fdf3dc,#342a10); --warn-line:light-dark(#ebd08c,#6d5a22);
+  --star:light-dark(#eaa416,#f2c14e);
+  /* câu hỏi BỔ SUNG — tím, cố tình khác hẳn màu nhấn của ngân hàng gốc */
+  --extra:light-dark(#5b3fbf,#b79bff); --extra-bg:light-dark(#f2eeff,#241f3a); --extra-line:light-dark(#c3b3f0,#5b4a95);
+  --r:14px;
 
   /* chiều sâu, thanh cuộn, chuyển động */
-  --shadow-sm:0 1px 2px rgba(0,0,0,.3);
-  --shadow-lift:0 8px 22px rgba(0,0,0,.36);
-  --sb-thumb:#2b3f55; --sb-thumb-hover:#3e5b79;
-  --glass:rgba(17,26,36,.72);
+  --shadow:0 8px 24px light-dark(rgb(34 45 57 / 8%),rgb(0 0 0 / 38%));
+  --shadow-sm:0 1px 2px light-dark(rgb(34 45 57 / 6%),rgb(0 0 0 / 30%));
+  --shadow-lift:0 8px 22px light-dark(rgb(34 45 57 / 12%),rgb(0 0 0 / 40%));
+  --sb-thumb:light-dark(#d2cac1,#3c4550); --sb-thumb-hover:light-dark(#b3a99d,#56606d);
+  --glass:light-dark(rgb(255 255 255 / 80%),rgb(24 29 36 / 78%));
   --ease:cubic-bezier(.22,.61,.36,1);
   --ease-back:cubic-bezier(.34,1.3,.64,1);
   --t-fast:.13s; --t:.22s;
 }
-html[data-theme="light"]{
-  --bg:#eef2f6; --bg2:#ffffff; --panel:#ffffff; --panel2:#f5f8fb;
-  --line:#dfe7ef; --line2:#c4d3e1;
-  --ink:#13202c; --ink2:#455a6e; --ink3:#74889c;
-  --band:#dbe9f8; --band-ink:#12212f;
-  --amber:#8a6508; --accent-bg:#ffc819; --accent-ink:#1a1a1a; --ok:#2e7d32; --ok-bg:#e8f5e9; --ok-line:#a5d6a7;
-  --bad:#c0392b; --bad-bg:#fdeceb; --bad-line:#f0b4ae;
-  --warn:#a6690c; --warn-bg:#fdf3e2; --warn-line:#e8c893;
-  --star:#d99e00;
-  --extra:#5b3fbf; --extra-bg:#f2eeff; --extra-line:#c3b3f0;
-  --shadow:0 8px 24px rgba(20,45,80,.10);
-  --shadow-sm:0 1px 2px rgba(20,45,80,.08);
-  --shadow-lift:0 8px 22px rgba(20,45,80,.14);
-  --sb-thumb:#c5d3e0; --sb-thumb-hover:#9cb0c5;
-  --glass:rgba(255,255,255,.74);
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+/* Đèn đêm: giữ độ sáng vừa phải của giao diện sáng nhưng cắt ánh sáng xanh — nền giấy ngà, chữ nâu
+   đậm, màu nhấn cam đất, thương hiệu nâu gỗ, bóng đổ pha nâu. Dành cho lúc học buổi tối.
+   color-scheme vẫn là light để ô nhập, hộp chọn của trình duyệt lấy bản sáng khớp nền ngà.
+   Chữ và màu trạng thái ≥ 4.5:1 trên nền thẻ lẫn nền trang — sửa màu thì phải đo lại. */
+:root[data-theme="night"]{
+  color-scheme:light;
+  --bg:#f1e7d5; --bg2:#fbf3e3; --panel:#fbf3e3; --panel2:#ece0cb;
+  --line:#e0cfb1; --line2:#c9b48f;
+  --ink:#2b2113; --ink2:#66502f; --ink3:#786243;
+  --brand:#6e4a1c; --brand-soft:#f0e1c6;
+  --amber:#9a4c15; --accent-ink:#fffaf0; --accent-ring:rgb(154 76 21 / 18%);
+  --ok:#4a6b1f; --ok-bg:#e7edd0; --ok-line:#b5c98a;
+  --bad:#a32e1e; --bad-bg:#f8dfd5; --bad-line:#e0a48c;
+  --warn:#7d5b05; --warn-bg:#f4e6bd; --warn-line:#d8bc71;
+  --star:#c07c0b;
+  --extra:#7a3b8f; --extra-bg:#f1e0e6; --extra-line:#cfa6c4;
+  --shadow:0 8px 24px rgb(74 48 14 / 12%);
+  --shadow-sm:0 1px 2px rgb(74 48 14 / 10%);
+  --shadow-lift:0 8px 22px rgb(74 48 14 / 18%);
+  --sb-thumb:#d6c29f; --sb-thumb-hover:#b89f75;
+  --glass:rgb(251 243 227 / 82%);
 }
 
 *{box-sizing:border-box}
@@ -81,7 +107,10 @@ html[data-size="xl"]{--cs:1.22}
 .side-head{padding:16px 16px 13px;border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:11px}
 .brand-mark{
-  width:36px;height:36px;border-radius:10px;background:var(--accent-bg);color:var(--accent-ink);
+  width:36px;height:36px;border-radius:10px;color:#fff;
+  /* chuyển sắc trong cùng màu thương hiệu; nửa đậm của dải đủ tối cho chữ trắng ở mọi tông */
+  background:linear-gradient(140deg,var(--brand),color-mix(in srgb,var(--brand) 62%,#000));
+  box-shadow:0 2px 8px color-mix(in srgb,var(--brand) 30%,transparent);
   display:grid;place-items:center;font-family:var(--f-mono);font-weight:600;font-size:13px;flex:0 0 auto
 }
 .brand h1{margin:0;font-size:15.5px;font-weight:650;letter-spacing:-.01em}
@@ -116,26 +145,78 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
 /* không ép border-radius ở đây — viền focus phải ôm đúng hình dạng sẵn có của phần tử */
 :focus-visible{outline:2px solid var(--amber);outline-offset:2px}
 
-/* ---------- chế độ luyện tập ---------- */
-.modes{display:flex;flex-direction:column;gap:5px;margin-bottom:18px}
-.mode{
-  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
-  background:transparent;border:1px solid transparent;border-radius:9px;padding:8px 10px;font-size:13.5px;
-  transition:background var(--t-fast),border-color var(--t-fast),transform var(--t-fast)
+/* ---------- khung thiết lập trước khi làm bài (components/setup.ts) ----------
+   Như minano_nihongo: từ 720px mỗi nhóm là một hàng — nhãn cột trái, lựa chọn co theo nội dung
+   bên phải. Chọn một = nút viên thuốc, nhóm có dòng phụ = thẻ, bật/tắt = công tắc. */
+.setup-title{font-weight:650;font-size:15px}
+.setup{display:flex;flex-direction:column;gap:18px;padding:18px 20px 20px}
+.setup .field{display:flex;flex-direction:column;gap:6px}
+.setup .label{
+  font-family:var(--f-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.11em;
+  color:var(--ink3);font-weight:600
 }
-.mode:hover{background:var(--panel);transform:translateX(2px)}
-.mode[aria-pressed="true"] .dot{box-shadow:0 0 0 3px color-mix(in srgb,var(--accent-bg) 20%,transparent)}
-.mode[aria-pressed="true"]{background:var(--panel);border-color:var(--line2)}
-.mode[aria-pressed="true"] .dot{background:var(--accent-bg)}
-.dot{
-  width:7px;height:7px;border-radius:50%;background:var(--line2);flex:0 0 auto;
-  transition:background var(--t-fast),box-shadow var(--t-fast)
+@media (min-width:720px){
+  .setup>.field{
+    display:grid;grid-template-columns:9.5rem minmax(0,1fr);grid-template-rows:auto auto auto;
+    gap:0 16px;align-items:start
+  }
+  /* nhãn trải dọc cả nhóm; padding-top đưa chữ ngang hàng chữ trong nút */
+  .setup>.field>.label{grid-column:1;grid-row:1/-1;padding-top:8px}
+  .setup>.field>:not(.label){grid-column:2}
+  .setup>.field>.label~*~*{margin-top:8px}
 }
-.mode .cnt{margin-left:auto;font-family:var(--f-mono);font-size:12px;color:var(--ink3)}
-
-.sws{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
-.sw{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink2);cursor:pointer}
-.sw input{accent-color:var(--amber);width:15px;height:15px;cursor:pointer;flex:0 0 auto}
+.setup .options{display:flex;flex-wrap:wrap;gap:6px}
+.option{
+  display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border:1px solid var(--line2);
+  border-radius:99px;background:transparent;font-size:13px;font-weight:550;text-align:left;
+  transition:border-color var(--t-fast),background var(--t-fast),color var(--t-fast)
+}
+.option:hover:not(:disabled){border-color:var(--amber);background:var(--panel2)}
+.option.is-active{
+  border-color:var(--amber);color:var(--amber);font-weight:650;
+  background:color-mix(in srgb,var(--amber) 11%,var(--panel))
+}
+.option:disabled{opacity:.45;cursor:not-allowed}
+.option-count{
+  font-family:var(--f-mono);font-size:11px;font-weight:600;padding:0 7px;border-radius:99px;
+  background:var(--panel2);color:var(--ink3)
+}
+.option.is-active .option-count{background:color-mix(in srgb,var(--amber) 16%,transparent);color:var(--amber)}
+.setup .options:has(>.option-stacked){display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.option-stacked{flex-direction:column;align-items:flex-start;gap:2px;width:100%;padding:9px 12px;border-radius:10px}
+.option-stacked strong{font-weight:620;line-height:1.35}
+.option-example{font-family:var(--f-mono);font-size:11px;font-weight:500;opacity:.75}
+.setup-select{
+  width:100%;max-width:560px;background:var(--panel);border:1px solid var(--line2);border-radius:8px;
+  padding:7px 9px;font-size:13px;transition:border-color var(--t-fast),box-shadow var(--t-fast)
+}
+.setup-select:hover{border-color:var(--amber)}
+.setup-select.is-active{border-color:var(--amber);box-shadow:0 0 0 3px var(--accent-ring)}
+.field-hint{font-size:12px;color:var(--ink3);line-height:1.45}
+/* bật/tắt là công tắc không khung viền — khung tô nền đặt cạnh các nút thì không phân biệt nổi
+   đâu là chọn một, đâu là bật tắt */
+.setup .options:has(>.switch){display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px 20px}
+.switch{display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:2px 0}
+.switch strong{display:block;font-size:13.5px;font-weight:600}
+.switch .field-hint{display:block;margin-top:1px}
+/* núm tròn vẽ bằng radial-gradient — Firefox không vẽ ::before trên thẻ input */
+.switch input{
+  appearance:none;-webkit-appearance:none;flex:0 0 auto;width:30px;height:18px;margin:2px 0 0;
+  border-radius:99px;cursor:inherit;
+  background:radial-gradient(circle,#fff 0 6px,transparent 6.5px) 0 0/18px 18px no-repeat,var(--line2);
+  transition:background-position var(--t-fast),background-color var(--t-fast)
+}
+.switch input:checked{background-color:var(--accent-bg);background-position:12px 0}
+.start-bar{
+  display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;
+  padding-top:16px;border-top:1px solid var(--line)
+}
+.start-plan{flex:1 1 220px;min-width:0;margin:0;font-size:13.5px;color:var(--ink2)}
+.btn.lg{padding:10px 22px;font-size:14.5px}
+.setup-empty{
+  margin:0;padding:10px 13px;border-radius:9px;font-size:13px;
+  background:var(--warn-bg);border:1px solid var(--warn-line);color:var(--warn)
+}
 
 .jump{display:flex;gap:6px;margin-bottom:11px}
 .jump input{
@@ -273,9 +354,9 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
   animation:pop .3s var(--ease-back)
 }
 .opt.right{border-color:var(--ok-line);background:var(--ok-bg);animation:flash .42s var(--ease)}
-.opt.right .key{background:var(--ok);border-color:var(--ok);color:#fff}
+.opt.right .key{background:var(--ok);border-color:var(--ok);color:var(--panel)}
 .opt.wrong{border-color:var(--bad-line);background:var(--bad-bg)}
-.opt.wrong .key{background:var(--bad);border-color:var(--bad);color:#fff}
+.opt.wrong .key{background:var(--bad);border-color:var(--bad);color:var(--panel)}
 .opt .mark{
   margin-left:auto;font-family:var(--f-mono);font-size:10.5px;font-weight:600;
   padding-left:12px;white-space:nowrap;letter-spacing:.03em;text-transform:uppercase
@@ -346,8 +427,10 @@ main{flex:1;min-width:0;display:flex;flex-direction:column}
   border:1px dashed color-mix(in srgb,var(--amber) 45%,transparent);
   font-size:calc(14px * var(--cs));color:var(--ink2);line-height:1.62
 }
-.qtext .vi{color:var(--band-ink);background:rgba(0,0,0,.16);border-color:rgba(255,255,255,.25)}
-html[data-theme="light"] .qtext .vi{background:rgba(255,255,255,.6);border-color:rgba(0,0,0,.18)}
+.qtext .vi{
+  color:var(--band-ink);background:color-mix(in srgb,var(--panel) 55%,transparent);
+  border-color:color-mix(in srgb,var(--band-ink) 22%,transparent)
+}
 .vi p{margin:0 0 6px} .vi p:last-child{margin:0}
 .vi-tag{
   display:inline-block;margin-bottom:6px;font-family:var(--f-mono);font-size:9.5px;
@@ -445,7 +528,7 @@ textarea{
   .wrap{padding:16px 12px 104px}
   .topbar{padding:9px 13px;gap:7px}
   .qtext{padding:16px 15px}
-  .opts,.subs,.explain,.actions,.hint,.exhibit{padding-left:14px;padding-right:14px}
+  .opts,.subs,.explain,.actions,.hint,.exhibit,.setup{padding-left:14px;padding-right:14px}
   .hide-sm{display:none}
   .keys{display:none}
 }

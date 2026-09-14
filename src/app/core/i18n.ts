@@ -15,7 +15,6 @@ export const STRINGS = {
   'common.questions': ['{n} câu', '{n} questions'],
   'common.close': ['Đóng', 'Close'],
   'common.cancel': ['Huỷ', 'Cancel'],
-  'common.clearFilter': ['Bỏ lọc', 'Clear filter'],
   'common.empty': ['Danh sách trống.', 'The list is empty.'],
 
   /* ---------- thanh trên / topbar ---------- */
@@ -40,8 +39,16 @@ export const STRINGS = {
     'Hiện bản dịch tiếng Việt ngay dưới nội dung tiếng Anh',
     'Show the Vietnamese translation under the English text',
   ],
-  'top.themeLight': ['Nền sáng', 'Light theme'],
-  'top.themeDark': ['Nền tối', 'Dark theme'],
+
+  /* ---------- giao diện / theme ---------- */
+  'theme.system': ['Tự động', 'Auto'],
+  'theme.light': ['Sáng', 'Light'],
+  'theme.dark': ['Tối', 'Dark'],
+  'theme.night': ['Đèn đêm', 'Night light'],
+  'theme.title': [
+    'Giao diện: {current} — bấm để chuyển sang {next}',
+    'Theme: {current} — click to switch to {next}',
+  ],
 
   /* ---------- phạm vi / scope ---------- */
   'nav.prev': ['Câu trước', 'Previous'],
@@ -49,16 +56,43 @@ export const STRINGS = {
 
   'scope.label': ['Phạm vi', 'Scope'],
   'scope.title': ['Phạm vi ôn tập', 'Study scope'],
-  'scope.all': ['Toàn bộ đề thi ({n} câu)', 'Entire question bank ({n} questions)'],
   'scope.extra': ['★ Chỉ câu bổ sung', '★ Supplementary only'],
-  'scope.extraOpt': ['★ Chỉ câu bổ sung ({n} câu)', '★ Supplementary only ({n} questions)'],
   'scope.origin': ['Ngân hàng gốc (PDF)', 'Original bank (PDF)'],
-  'scope.originOpt': ['Chỉ câu gốc từ PDF ({n} câu)', 'Original PDF questions only ({n})'],
-  'scope.wholeDomain': ['▸ Cả phần này ({n} câu)', '▸ This whole domain ({n} questions)'],
-  'scope.set': ['Phạm vi: {name} · {n} câu', 'Scope: {name} · {n} questions'],
-  'scope.cleared': [
-    'Đã bỏ lọc — ôn toàn bộ {n} câu.',
-    'Filter cleared — practising all {n} questions.',
+
+  /* ---------- khung thiết lập / setup ---------- */
+  'setup.badge': ['THIẾT LẬP', 'SETUP'],
+  'setup.title': ['Thiết lập bài luyện', 'Set up a practice round'],
+  'setup.change': ['Thiết lập', 'Setup'],
+  'setup.scopeAll': ['Toàn bộ', 'Everything'],
+  'setup.scopeAllShort': ['Toàn bộ đề thi', 'Entire question bank'],
+  'setup.scopeExtra': ['★ Câu bổ sung', '★ Supplementary'],
+  'setup.scopeOrigin': ['Câu gốc (PDF)', 'Original (PDF)'],
+  'setup.topic': ['Chọn một chủ đề', 'Pick a single topic'],
+  'setup.topicAny': ['— Hoặc chọn một chủ đề cụ thể —', '— Or pick a single topic —'],
+  'setup.favHint': [
+    'Bấm ★ trên thẻ câu hỏi để thêm vào Yêu thích.',
+    'Star ★ a question card to add it to Favourites.',
+  ],
+  'setup.count': ['Số câu', 'Questions'],
+  'setup.countAll': ['Tất cả', 'All'],
+  'setup.shuffleQHint': [
+    'Mỗi lượt một thứ tự khác — nên bật khi giới hạn số câu.',
+    'A new order every round — worth turning on with a question limit.',
+  ],
+  'setup.shuffleOHint': [
+    'Nhớ đáp án theo nội dung chứ không theo vị trí A/B/C.',
+    'Remember answers by content, not by their A/B/C position.',
+  ],
+  'setup.autoNextHint': [
+    'Trả lời sai thì vẫn dừng lại để đọc giải thích.',
+    'Wrong answers still stop so you can read the explanation.',
+  ],
+  'setup.plan': ['{n} câu · {mode} · {scope}', '{n} questions · {mode} · {scope}'],
+  'setup.start': ['Bắt đầu', 'Start'],
+  'setup.resume': ['Quay lại bài đang làm', 'Back to current round'],
+  'setup.empty': [
+    'Không có câu nào khớp lựa chọn này — hãy đổi phạm vi hoặc chế độ.',
+    'No questions match this selection — change the scope or mode.',
   ],
 
   /* ---------- chế độ / modes ---------- */
@@ -157,8 +191,8 @@ export const STRINGS = {
   'card.keysMove': ['chuyển câu', 'move'],
   'card.emptyMode': ['Không có câu hỏi nào trong chế độ {mode}.', 'No questions in {mode} mode.'],
   'card.emptyHint': [
-    'Chọn “Toàn bộ” ở thanh bên, hoặc đánh dấu ⭐ ở các câu bạn muốn ôn lại.',
-    'Pick “All” in the sidebar, or star ⭐ the questions you want to review.',
+    'Mở Thiết lập để chọn phạm vi hoặc chế độ khác, hoặc đánh dấu ⭐ ở các câu bạn muốn ôn lại.',
+    'Open Setup to pick another scope or mode, or star ⭐ the questions you want to review.',
   ],
 
   /* ---------- loại câu hỏi / question types ---------- */

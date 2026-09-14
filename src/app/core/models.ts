@@ -1,9 +1,9 @@
 import { Lang } from './i18n';
+import { Theme } from './theme';
 
 export type QuestionType = 'single' | 'multi' | 'yesno' | 'yesno_table' | 'match';
 export type Mode = 'all' | 'fav' | 'review' | 'todo';
 export type Size = 'md' | 'lg' | 'xl';
-export type Theme = 'dark' | 'light';
 /** màn hình chính: luyện thi hoặc học kiến thức */
 export type View = 'practice' | 'study';
 
@@ -95,9 +95,14 @@ export interface Settings {
   shuffleO?: boolean;
   autoNext?: boolean;
   showVi?: boolean;
+  /** bản HTML gốc chỉ biết 'dark' | 'light' */
   theme?: Theme;
   size?: Size;
   idx?: number;
+  /** false = đang ở khung thiết lập; thiếu trường (dữ liệu cũ) = đang làm bài */
+  started?: boolean;
+  /** giới hạn số câu của lượt luyện; null = tất cả */
+  limit?: number | null;
 }
 
 /** Payload lưu dưới khoá ai900:data:v1 — giữ nguyên định dạng của bản HTML. */
@@ -109,6 +114,8 @@ export interface StoredData {
   pick?: Record<number, Pick>;
   revealed?: Record<number, boolean>;
   settings?: Settings;
+  /** thứ tự câu của lượt đang làm — tải lại trang vẫn giữ nguyên dù có trộn câu */
+  order?: number[];
 }
 
 /** Định dạng file xuất/nhập JSON. */
