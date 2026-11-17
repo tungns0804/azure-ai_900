@@ -55,6 +55,20 @@
             EN
           </button>
         </div>
+        <!-- mousedown.preventDefault: bấm nút không làm mất đoạn đang bôi đen -->
+        <button
+          class="btn sm vocab-btn"
+          [class.pending]="!!vocab.selEn()"
+          [title]="i18n.t('vocab.btnHint')"
+          (mousedown)="$event.preventDefault()"
+          (click)="vocabDlg.open()"
+        >
+          @if (vocab.selEn()) {
+            {{ i18n.t('vocab.btnSave') }}
+          } @else {
+            {{ i18n.t('vocab.btn') }} <span class="vocab-n">{{ vocab.count() }}</span>
+          }
+        </button>
         <div class="sizectl" role="group" [attr.aria-label]="i18n.t('top.sizeGroup')">
           <button
             [title]="i18n.t('top.sizeDown')"
@@ -141,6 +155,8 @@
 <div class="toast" [class.show]="toast.visible()" role="status" aria-live="polite">
   {{ toast.message() }}
 </div>
+
+<app-vocab #vocabDlg />
 
 <dialog #zoomDlg id="zoomDlg">
   <div class="dlg-h">{{ i18n.t('dlg.zoomTitle') }}</div>

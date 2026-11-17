@@ -299,6 +299,64 @@ export const STRINGS = {
   'size.md': ['Vừa', 'Medium'],
   'size.lg': ['Lớn', 'Large'],
   'size.xl': ['Rất lớn', 'Extra large'],
+
+  /* ---------- sổ từ vựng / vocabulary ---------- */
+  'vocab.btn': ['Từ vựng', 'Vocabulary'],
+  'vocab.btnSave': ['＋ Lưu từ', '＋ Save word'],
+  'vocab.btnHint': [
+    'Sổ từ vựng tiếng Anh. Bôi đen một từ trong câu hỏi rồi bấm để lưu.',
+    'English word list. Highlight a word in the question, then click to save it.',
+  ],
+  'vocab.title': ['Sổ từ vựng', 'Vocabulary'],
+  'vocab.tabList': ['Danh sách ({n})', 'Word list ({n})'],
+  'vocab.tabPractice': ['Luyện tập', 'Practise'],
+  'vocab.en': ['Từ tiếng Anh', 'English word'],
+  'vocab.vi': ['Nghĩa tiếng Việt', 'Vietnamese meaning'],
+  'vocab.add': ['Lưu từ', 'Save'],
+  'vocab.tip': [
+    'Mẹo: bôi đen từ trong câu hỏi, bôi đen nghĩa của nó trong hộp TIẾNG VIỆT (bật Song ngữ), rồi bấm nút Từ vựng — hai ô sẽ tự điền.',
+    'Tip: highlight a word in the question and its meaning in the VIETNAMESE box (turn Bilingual on), then click Vocabulary — both fields fill in automatically.',
+  ],
+  'vocab.bulk': ['Nạp nhiều từ', 'Add many words'],
+  'vocab.bulkHint': [
+    'Mỗi dòng một từ. Có thể ghi kèm nghĩa sau dấu =, -, :, | hoặc Tab.',
+    'One word per line. You can add the meaning after =, -, :, | or a Tab.',
+  ],
+  'vocab.bulkOk': ['Nạp vào danh sách', 'Add to list'],
+  'vocab.empty': ['Chưa có từ nào. Thêm từ ở ô phía trên.', 'No words yet. Add one above.'],
+  'vocab.noMeaning': ['(chưa có nghĩa)', '(no meaning yet)'],
+  'vocab.known': ['Đã thuộc', 'Known'],
+  'vocab.learning': ['Đang học', 'Learning'],
+  'vocab.fromQ': ['Câu {id}', 'Q{id}'],
+  'vocab.delete': ['Xoá từ', 'Delete word'],
+  'vocab.stats': ['{known}/{total} từ đã thuộc', '{known}/{total} words known'],
+  'vocab.onlyNew': ['Chỉ ôn từ chưa thuộc', 'Only words not yet known'],
+  'vocab.start': ['Bắt đầu', 'Start'],
+  'vocab.restart': ['Ôn lượt mới', 'New round'],
+  'vocab.reveal': ['Hiện nghĩa', 'Show meaning'],
+  'vocab.again': ['Chưa nhớ', 'Not yet'],
+  'vocab.got': ['Nhớ rồi', 'Got it'],
+  'vocab.pos': ['Từ {i}/{n}', 'Word {i}/{n}'],
+  'vocab.done': ['Xong lượt ôn: nhớ {ok}/{n} từ.', 'Round finished: {ok}/{n} remembered.'],
+  'vocab.keys': [
+    'Phím tắt: Space hiện nghĩa · 1 chưa nhớ · 2 nhớ rồi',
+    'Shortcuts: Space shows the meaning · 1 not yet · 2 got it',
+  ],
+  'vocab.practiceEmpty': [
+    'Danh sách đang trống — hãy lưu vài từ trước.',
+    'Your list is empty — save a few words first.',
+  ],
+  'vocab.allKnown': [
+    'Bạn đã thuộc hết các từ. Bỏ chọn “Chỉ ôn từ chưa thuộc” để ôn lại toàn bộ.',
+    'You know every word. Untick “Only words not yet known” to review them all.',
+  ],
+  'toast.vocabAdded': ['Đã lưu “{w}”.', 'Saved “{w}”.'],
+  'toast.vocabUpdated': ['Đã cập nhật nghĩa của “{w}”.', 'Updated the meaning of “{w}”.'],
+  'toast.vocabExists': ['“{w}” đã có trong danh sách.', '“{w}” is already in the list.'],
+  'toast.vocabBulk': [
+    'Đã thêm {a} từ, cập nhật {u}, bỏ qua {s}.',
+    'Added {a}, updated {u}, skipped {s}.',
+  ],
 } as const satisfies Record<string, readonly [string, string]>;
 
 export type I18nKey = keyof typeof STRINGS;

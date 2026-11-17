@@ -17,11 +17,20 @@ import { QuestionCardComponent } from './components/question-card';
 import { StudyComponent } from './components/study';
 import { SetupComponent } from './components/setup';
 import { IconComponent } from './components/icon';
+import { VocabComponent } from './components/vocab';
+import { VocabService } from './core/vocab.service';
 
 @Component({
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SidebarComponent, QuestionCardComponent, StudyComponent, SetupComponent, IconComponent],
+  imports: [
+    SidebarComponent,
+    QuestionCardComponent,
+    StudyComponent,
+    SetupComponent,
+    IconComponent,
+    VocabComponent,
+  ],
   templateUrl: './app.html',
   styles: `
     .viewtabs { display: flex; border: 1px solid var(--line2); border-radius: 8px; overflow: hidden; }
@@ -50,6 +59,15 @@ import { IconComponent } from './components/icon';
     }
     .scope-n { font-family: var(--f-mono); font-size: 12px; color: var(--ink3); }
     .study-wrap { padding-bottom: 40px; }
+    .vocab-n {
+      font-family: var(--f-mono); font-size: 11px; color: var(--ink3);
+      border: 1px solid var(--line2); border-radius: 20px; padding: 0 6px; margin-left: 4px;
+    }
+    /* đang có từ bôi đen chờ lưu: đổi sang màu nhấn "làm gì tiếp" */
+    .vocab-btn.pending {
+      background: var(--accent-bg); border-color: var(--accent-bg); color: var(--accent-ink);
+      font-weight: 650;
+    }
     @media (max-width: 480px) { .theme-label { display: none; } }
     @keyframes scopeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
   `,
@@ -58,6 +76,7 @@ export class App {
   readonly quiz = inject(QuizService);
   readonly toast = inject(ToastService);
   readonly i18n = inject(I18nService);
+  readonly vocab = inject(VocabService);
 
   readonly sideOpen = signal(false);
   readonly zoomSrc = signal('');
