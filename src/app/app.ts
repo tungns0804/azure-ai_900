@@ -18,6 +18,7 @@ import { StudyComponent } from './components/study';
 import { SetupComponent } from './components/setup';
 import { IconComponent } from './components/icon';
 import { VocabComponent } from './components/vocab';
+import { PlanComponent } from './components/plan';
 import { VocabService } from './core/vocab.service';
 
 @Component({
@@ -30,6 +31,7 @@ import { VocabService } from './core/vocab.service';
     SetupComponent,
     IconComponent,
     VocabComponent,
+    PlanComponent,
   ],
   templateUrl: './app.html',
   styles: `

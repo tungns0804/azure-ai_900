@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AI901_URL, DOMAINS, STUDY_GUIDE_URL } from '../core/categories';
+import { LINK_EN } from '../core/categories.en';
 import { CAT_EXTRA, QuizService } from '../core/quiz.service';
 import { I18nService } from '../core/i18n.service';
 
@@ -205,7 +206,7 @@ export class StudyComponent {
         topics: g.topics.map((t) => ({
           id: t.id,
           objective: t.objective,
-          links: t.links,
+          links: t.links.map((l) => ({ url: l.url, label: this.i18n.pick(l.label, LINK_EN[l.label]) })),
           title: this.i18n.pick(t.title, t.titleEn),
           overview: this.i18n.pick(t.overview, t.overviewEn),
         })),

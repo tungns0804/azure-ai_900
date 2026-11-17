@@ -5,7 +5,7 @@ export type QuestionType = 'single' | 'multi' | 'yesno' | 'yesno_table' | 'match
 export type Mode = 'all' | 'fav' | 'review' | 'todo';
 export type Size = 'md' | 'lg' | 'xl';
 /** màn hình chính: luyện thi hoặc học kiến thức */
-export type View = 'practice' | 'study';
+export type View = 'practice' | 'study' | 'plan';
 
 /** Trạng thái của một câu: đúng / sai / đã xem đáp án. */
 export type Status = 'ok' | 'no' | 'sh';

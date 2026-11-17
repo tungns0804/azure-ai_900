@@ -85,7 +85,7 @@ function shuffle<T>(a: T[]): T[] {
             <textarea
               [value]="bulk()"
               (input)="bulk.set(val($event))"
-              placeholder="regression = hồi quy&#10;feature - đặc trưng&#10;inference"
+              [placeholder]="i18n.t('vocab.bulkPlaceholder')"
             ></textarea>
             <div class="bulk-f">
               <button class="btn sm" [disabled]="!bulk().trim()" (click)="saveBulk()">

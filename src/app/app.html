@@ -28,6 +28,13 @@
           >
             {{ i18n.t('view.study') }}
           </button>
+          <button
+            [class.on]="quiz.view() === 'plan'"
+            [attr.aria-pressed]="quiz.view() === 'plan'"
+            (click)="quiz.setView('plan')"
+          >
+            {{ i18n.t('view.plan') }}
+          </button>
         </div>
         <div class="sep hide-sm"></div>
         <div class="stat">
@@ -108,11 +115,13 @@
       <div class="bar"><i [style.width.%]="quiz.stats().pct"></i></div>
     </div>
 
-    <div class="wrap" [class.study-wrap]="quiz.view() === 'study'">
+    <div class="wrap" [class.study-wrap]="quiz.view() !== 'practice'">
       <!-- chờ init() nạp xong tiến độ: khung thiết lập lấy bản nháp từ giá trị đã lưu -->
       @if (quiz.ready()) {
         @if (quiz.view() === 'study') {
           <app-study />
+        } @else if (quiz.view() === 'plan') {
+          <app-plan />
         } @else if (!quiz.started()) {
           <app-setup />
         } @else {

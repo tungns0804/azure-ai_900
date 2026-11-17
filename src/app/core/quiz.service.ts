@@ -240,7 +240,7 @@ export class QuizService {
       // chỉ nhận lại bộ lọc nếu id vẫn còn tồn tại trong danh mục
       const cat = st.category ?? null;
       this.category.set(cat && this.isKnownCategory(cat) ? cat : null);
-      this.view.set(st.view === 'study' ? 'study' : 'practice');
+      this.view.set(st.view === 'study' || st.view === 'plan' ? st.view : 'practice');
       // người dùng cũ chưa từng chọn ngôn ngữ thì giữ nguyên tiếng Việt như trước
       this.i18n.set(st.lang === 'en' || st.lang === 'vi' ? st.lang : 'vi');
       this.shuffleQ.set(!!st.shuffleQ);
@@ -643,6 +643,8 @@ export class QuizService {
   setLang(l: Lang): void {
     if (this.i18n.lang() === l) return;
     this.i18n.set(l);
+    // chế độ EN phải toàn tiếng Anh: tắt hộp dịch tiếng Việt (vẫn bật lại được bằng nút Bilingual)
+    if (l === 'en') this.showVi.set(false);
     this.save();
     this.toast.show(this.i18n.t('toast.langChanged'));
   }

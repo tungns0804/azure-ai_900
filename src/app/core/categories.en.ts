@@ -310,3 +310,46 @@ export const TOPIC_EN: Record<string, EnTopic> = {
       'A library of models from many providers (OpenAI, Meta, Mistral, Microsoft…) that can be compared on capability, cost and benchmarks, then deployed straight from the catalog.',
   },
 };
+
+/**
+ * Nhãn tiếng Anh cho các link tài liệu, khoá theo nhãn tiếng Việt trong categories.ts.
+ * Nhãn vốn đã là tiếng Anh (vd. "Object detection") thì không cần có mặt ở đây.
+ *
+ * English labels for the documentation links, keyed by the Vietnamese label in categories.ts.
+ */
+export const LINK_EN: Record<string, string> = {
+  'Anomaly Detector — tổng quan': 'Anomaly Detector — overview',
+  'Automated ML là gì': 'What is automated ML?',
+  'Azure AI Foundry là gì': 'What is Azure AI Foundry?',
+  'Azure AI Language — tổng quan': 'Azure AI Language — overview',
+  'Azure AI Search là gì': 'What is Azure AI Search?',
+  'Azure AI Vision — tổng quan': 'Azure AI Vision — overview',
+  'Azure AI services là gì': 'What are Azure AI services?',
+  'Azure Bot Service — tổng quan': 'Azure Bot Service — overview',
+  'Bảo mật Azure AI services': 'Azure AI services security',
+  'Bảo mật trong Azure ML': 'Security in Azure Machine Learning',
+  'Custom Vision — tổng quan': 'Custom Vision — overview',
+  'Các mô hình trong Azure AI Foundry': 'Models in Azure AI Foundry',
+  'Designer — tổng quan': 'Designer — overview',
+  'Endpoint và triển khai': 'Endpoints and deployment',
+  'Face — nhận dạng danh tính': 'Face — identity recognition',
+  'Fairness trong machine learning': 'Fairness in machine learning',
+  'Foundry Models — tổng quan': 'Foundry Models — overview',
+  'Gắn tag cho ảnh': 'Image tagging',
+  'Huấn luyện mô hình': 'Training models',
+  'Huấn luyện mô hình trong Azure ML': 'Training models in Azure Machine Learning',
+  'Học phần: Fundamentals of generative AI': 'Module: Fundamentals of generative AI',
+  'Học phần: Fundamentals of machine learning': 'Module: Fundamentals of machine learning',
+  'Học phần: Get started with AI': 'Module: Get started with AI',
+  'Học phần: Responsible AI': 'Module: Responsible AI',
+  'Indexer — tổng quan': 'Indexer — overview',
+  'Mã hoá dữ liệu': 'Data encryption',
+  'Mô hình do Azure cung cấp': 'Models sold directly by Azure',
+  'OCR — nhận dạng chữ': 'OCR — reading text',
+  'Phát hiện khuôn mặt': 'Face detection',
+  'Phát hiện thông tin cá nhân (PII)': 'Personally identifiable information (PII) detection',
+  'Prompt engineering nâng cao': 'Advanced prompt engineering',
+  'Quản lý & triển khai mô hình': 'Model management and deployment',
+  'Responsible AI — tổng quan': 'Responsible AI — overview',
+  'Tạo object detector với Custom Vision': 'Build an object detector with Custom Vision',
+};

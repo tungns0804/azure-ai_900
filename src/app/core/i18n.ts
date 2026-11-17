@@ -21,6 +21,34 @@ export const STRINGS = {
   'view.group': ['Màn hình', 'Screen'],
   'view.practice': ['Luyện thi', 'Practice'],
   'view.study': ['Học kiến thức', 'Study'],
+  'view.plan': ['Lộ trình thi', 'Exam plan'],
+
+  /* ---------- lộ trình thi / exam plan ---------- */
+  'plan.badge': ['LỘ TRÌNH THI', 'EXAM PLAN'],
+  'plan.title': [
+    'Lộ trình 4 tuần thi Azure AI Fundamentals trong tháng 12/2026',
+    'A 4-week plan to earn Azure AI Fundamentals in December 2026',
+  ],
+  'plan.retiredNote': [
+    'AI-900 đã ngừng thi từ 30/06/2026. Lộ trình này dành cho đề thay thế AI-901 — vẫn cấp chứng chỉ Azure AI Fundamentals. Đề AI-901 cần Python cơ bản, 55–60% là thực hành trên Microsoft Foundry và không còn phần Machine Learning.',
+    'AI-900 was retired on 30 June 2026. This plan targets its replacement, AI-901 — which still earns Azure AI Fundamentals. AI-901 expects basic Python, is 55–60% hands-on Microsoft Foundry and no longer covers Machine Learning.',
+  ],
+  'plan.progress': ['{done}/{total} việc đã xong', '{done}/{total} tasks done'],
+  'plan.daysLeft': [
+    'Còn {n} ngày tới ngày thi dự kiến ({date})',
+    '{n} days to the target exam date ({date})',
+  ],
+  'plan.examToday': ['Hôm nay là ngày thi dự kiến — chúc bạn thi tốt!', 'Today is the target exam date — good luck!'],
+  'plan.examPast': ['Đã qua ngày thi dự kiến ({date}).', 'The target exam date ({date}) has passed.'],
+  'plan.thisWeek': ['Tuần này', 'This week'],
+  'plan.practice': ['Luyện: {name}', 'Practise: {name}'],
+  'plan.pitfalls': ['DỄ MẤT ĐIỂM', 'COMMON PITFALLS'],
+  'plan.resources': ['TÀI LIỆU CHÍNH', 'KEY RESOURCES'],
+  'plan.reset': ['Bỏ đánh dấu tất cả', 'Untick everything'],
+  'plan.resetConfirm': [
+    'Bỏ đánh dấu toàn bộ việc đã xong trong lộ trình?',
+    'Untick every completed task in the plan?',
+  ],
   'top.done': ['Đã làm', 'Answered'],
   'top.ok': ['Đúng', 'Correct'],
   'top.no': ['Sai', 'Wrong'],
@@ -322,7 +350,11 @@ export const STRINGS = {
     'Mỗi dòng một từ. Có thể ghi kèm nghĩa sau dấu =, -, :, | hoặc Tab.',
     'One word per line. You can add the meaning after =, -, :, | or a Tab.',
   ],
-  'vocab.bulkOk': ['Nạp vào danh sách', 'Add to list'],
+  'vocab.bulkPlaceholder': [
+    'regression = hồi quy\nfeature - đặc trưng\ninference',
+    'regression = <meaning>\nfeature - <meaning>\ninference',
+  ],
+  'vocab.bulkOk':['Nạp vào danh sách', 'Add to list'],
   'vocab.empty': ['Chưa có từ nào. Thêm từ ở ô phía trên.', 'No words yet. Add one above.'],
   'vocab.noMeaning': ['(chưa có nghĩa)', '(no meaning yet)'],
   'vocab.known': ['Đã thuộc', 'Known'],
