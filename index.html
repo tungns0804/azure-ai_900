@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="vi" data-size="md" data-beasties-container>
+<head>
+  <meta charset="utf-8">
+  <title>AI-900 Practice · Azure AI Fundamentals</title>
+  <base href="/azure-ai_900/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    // Áp tông màu + cỡ chữ đã lưu NGAY trước khi Angular khởi động, nếu không trang chớp màu hệ
+    // thống một nhịp rồi mới đổi. Giữ đồng bộ với THEMES (core/theme.ts) và QuizService.save().
+    try {
+      var st = (JSON.parse(localStorage.getItem('ai900:data:v1') || 'null') || {}).settings || {};
+      if (st.theme === 'light' || st.theme === 'dark' || st.theme === 'night') {
+        document.documentElement.setAttribute('data-theme', st.theme);
+      }
+      if (st.size === 'lg' || st.size === 'xl') document.documentElement.setAttribute('data-size', st.size);
+      if (st.lang === 'en') document.documentElement.lang = 'en';
+    } catch (e) { /* localStorage bị chặn thì theo mặc định */ }
+  </script>
+<style>:root{color-scheme:light dark;--f-ui:"InterVar","Segoe UI Variable Text","Segoe UI",-apple-system,BlinkMacSystemFont,system-ui,Roboto,Arial,sans-serif;--f-mono:"PlexMono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--bg:light-dark(#faf9f7,#0f1318);--bg2:light-dark(#ffffff,#181d24);--panel:light-dark(#ffffff,#181d24);--panel2:light-dark(#f3f1ee,#20262e);--line:light-dark(#e6e1db,#2a313a);--line2:light-dark(#d2cac1,#3c4550);--ink:light-dark(#222d39,#edebe8);--ink2:light-dark(#4f5d70,#a0a6ae);--ink3:light-dark(#66727f,#868d97);--brand:light-dark(#0057b8,#5c9be0);--brand-soft:light-dark(#e6eef8,#1e2f44);--band:var(--brand-soft);--band-ink:var(--ink);--amber:light-dark(#15855f,#2cc594);--accent-bg:var(--amber);--accent-ink:light-dark(#ffffff,#06140f);--accent-ring:light-dark(rgb(21 133 95 / 16%),rgb(44 197 148 / 22%));--ok:light-dark(#3d7a3d,#86c28f);--ok-bg:light-dark(#e9f3e7,#1b3223);--ok-line:light-dark(#a9d0a5,#3a6a45);--bad:light-dark(#b3361f,#e0877b);--bad-bg:light-dark(#fcebe7,#3a1f1c);--bad-line:light-dark(#eba99c,#74392f);--warn:light-dark(#94620b,#e0c77a);--warn-bg:light-dark(#fdf3dc,#342a10);--warn-line:light-dark(#ebd08c,#6d5a22);--star:light-dark(#eaa416,#f2c14e);--extra:light-dark(#5b3fbf,#b79bff);--extra-bg:light-dark(#f2eeff,#241f3a);--extra-line:light-dark(#c3b3f0,#5b4a95);--r:14px;--shadow:0 8px 24px light-dark(rgb(34 45 57 / 8%),rgb(0 0 0 / 38%));--shadow-sm:0 1px 2px light-dark(rgb(34 45 57 / 6%),rgb(0 0 0 / 30%));--shadow-lift:0 8px 22px light-dark(rgb(34 45 57 / 12%),rgb(0 0 0 / 40%));--sb-thumb:light-dark(#d2cac1,#3c4550);--sb-thumb-hover:light-dark(#b3a99d,#56606d);--glass:light-dark(rgb(255 255 255 / 80%),rgb(24 29 36 / 78%));--ease:cubic-bezier(.22,.61,.36,1);--ease-back:cubic-bezier(.34,1.3,.64,1);--t-fast:.13s;--t:.22s}*{box-sizing:border-box}html,body{height:100%}body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}@supports not selector(::-webkit-scrollbar){*{scrollbar-width:thin;scrollbar-color:var(--sb-thumb) transparent}}html{--cs:1}@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}app-root{display:contents}</style><link rel="stylesheet" href="styles-MKR2FOIG.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="styles-MKR2FOIG.css"></noscript></head>
+<body>
+  <app-root></app-root>
+<link rel="modulepreload" href="chunk-HGOVRPVT.js"><link rel="modulepreload" href="chunk-B7H5ELRK.js"><link rel="modulepreload" href="chunk-4DUXSRS4.js"><script src="polyfills-5CFQRCPP.js" type="module"></script><script src="main-ZJDUPK7T.js" type="module"></script></body>
+</html>
